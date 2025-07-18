@@ -17,5 +17,6 @@ interface MAXRequestInterface
     public function putJSON(string $method, array $params = [], array $headers = []): ResponseInterface;
 
     public function patchJSON(string $method, array $params = [], array $headers = []): ResponseInterface;
+
     public function deleteJSON(string $method, array $params = [], array $headers = []): ResponseInterface;
 }
