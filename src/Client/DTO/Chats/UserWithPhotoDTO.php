@@ -1,16 +1,18 @@
 <?php
 
-namespace TH\MAX\Client\DTO\Bots;
+namespace TH\MAX\Client\DTO\Chats;
 
 use TH\MAX\DTO\BaseDTO;
 
-class UpdateDTO extends BaseDTO
+class UserWithPhotoDTO extends BaseDTO
 {
     public int $user_id;
 
     public string $first_name;
 
     public ?string $last_name;
+
+    public ?string $name;
 
     public ?string $username;
 
@@ -23,6 +25,4 @@ class UpdateDTO extends BaseDTO
     public string $avatar_url;
 
     public string $full_avatar_url;
-
-    public ?array $commands;
 }

@@ -14,13 +14,38 @@ abstract class CommonModule
         $this->request = $request;
     }
 
-    protected function get(string $method, ?array $params = null): ResponseInterface
+    protected function get(string $method, ?array $params = null): array
     {
-        return $this->request->get($method, $params ?? []);
+        $response = $this->request->get($method, $params ?? []);
+        return $this->getResponse($response);
     }
 
-    protected function patch(string $method, ?array $params = null): ResponseInterface
+    protected function post(string $method, ?array $params = null): array
     {
-        return $this->request->patchJSON($method, $params ?? []);
+        $response = $this->request->post($method, $params ?? []);
+        return $this->getResponse($response);
+    }
+
+    protected function put(string $method, ?array $params = null): array
+    {
+        $response = $this->request->putJSON($method, $params ?? []);
+        return $this->getResponse($response);
+    }
+
+    protected function patch(string $method, ?array $params = null): array
+    {
+        $response = $this->request->patchJSON($method, $params ?? []);
+        return $this->getResponse($response);
+    }
+
+    protected function delete(string $method, ?array $params = null): array
+    {
+        $response = $this->request->deleteJSON($method, $params ?? []);
+        return $this->getResponse($response);
+    }
+
+    private function getResponse(ResponseInterface $response): array
+    {
+        return json_decode($response->getBody()->getContents(), true);
     }
 }

@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Bots;
 
 use TH\MAX\DTO\BaseDTO;
 
-class MeDTO extends BaseDTO
+class BotDTO extends BaseDTO
 {
     public int $user_id;
 
