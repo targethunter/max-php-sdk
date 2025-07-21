@@ -12,7 +12,7 @@ interface MAXRequestInterface
 
     public function post(string $method, array $params = [], array $headers = []): ResponseInterface;
 
-    public function postJSON(string $method, array $params = [], array $headers = []): ResponseInterface;
+    public function postJSON(string $method, array $params = [], array $query_params = [], array $headers = []): ResponseInterface;
 
     public function putJSON(string $method, array $params = [], array $headers = []): ResponseInterface;
 

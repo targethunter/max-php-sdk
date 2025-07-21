@@ -20,9 +20,9 @@ abstract class CommonModule
         return $this->getResponse($response);
     }
 
-    protected function post(string $method, ?array $params = null): array
+    protected function post(string $method, ?array $params = null, ?array $query_params = null): array
     {
-        $response = $this->request->post($method, $params ?? []);
+        $response = $this->request->postJSON($method, $params ?? [], $query_params ?? []);
         return $this->getResponse($response);
     }
 

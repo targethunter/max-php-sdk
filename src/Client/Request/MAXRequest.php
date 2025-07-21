@@ -41,7 +41,8 @@ class MAXRequest implements MAXRequestInterface
     public function post(string $method, array $params = [], array $headers = []): ResponseInterface
     {
         return $this->client->post($this->getURL($method), [
-            'form_params' => array_merge($params, ['access_token' => $this->access_token]),
+            'query' => ['access_token' => $this->access_token],
+            'form_params' => $params,
             'headers' => $headers,
         ]);
     }
@@ -49,10 +50,11 @@ class MAXRequest implements MAXRequestInterface
     /**
      * @throws GuzzleException
      */
-    public function postJSON(string $method, array $params = [], array $headers = []): ResponseInterface
+    public function postJSON(string $method, array $params = [], array $query_params = [], array $headers = []): ResponseInterface
     {
         return $this->client->post($this->getURL($method), [
-            'json' => array_merge($params, ['access_token' => $this->access_token]),
+            'query' => array_merge($query_params, ['access_token' => $this->access_token]),
+            'json' => $params,
             'headers' => $headers,
         ]);
     }
@@ -63,7 +65,8 @@ class MAXRequest implements MAXRequestInterface
     public function putJSON(string $method, array $params = [], array $headers = []): ResponseInterface
     {
         return $this->client->put($this->getURL($method), [
-            'json' => array_merge($params, ['access_token' => $this->access_token]),
+            'query' => ['access_token' => $this->access_token],
+            'json' => $params,
             'headers' => $headers,
         ]);
     }
@@ -74,7 +77,8 @@ class MAXRequest implements MAXRequestInterface
     public function patchJSON(string $method, array $params = [], array $headers = []): ResponseInterface
     {
         return $this->client->patch($this->getURL($method), [
-            'json' => array_merge($params, ['access_token' => $this->access_token]),
+            'query' => ['access_token' => $this->access_token],
+            'json' => $params,
             'headers' => $headers,
         ]);
     }
@@ -85,7 +89,8 @@ class MAXRequest implements MAXRequestInterface
     public function deleteJSON(string $method, array $params = [], array $headers = []): ResponseInterface
     {
         return $this->client->delete($this->getURL($method), [
-            'json' => array_merge($params, ['access_token' => $this->access_token]),
+            'query' => ['access_token' => $this->access_token],
+            'json' => $params,
             'headers' => $headers,
         ]);
     }

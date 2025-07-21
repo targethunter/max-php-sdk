@@ -20,11 +20,7 @@ class Subscriptions extends CommonModule
 
     public function getAll(): SubscriptionListResponse
     {
-        $response = $this->get('/subscriptions');
-
-        $response['items'] = SubscriptionCollection::fromArray($response['subscriptions']);
-
-        return new SubscriptionListResponse($response);
+        return new SubscriptionListResponse($this->get('/subscriptions'));
     }
 
     public function subscribe(
@@ -64,8 +60,6 @@ class Subscriptions extends CommonModule
             'marker' => $marker,
             'types' => $types,
         ]);
-
-        $response['items'] = UpdateCollection::fromArray($response['updates']);
 
         return new UpdateListResponse($response);
     }

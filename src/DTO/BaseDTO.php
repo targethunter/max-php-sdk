@@ -2,12 +2,19 @@
 
 namespace TH\MAX\DTO;
 
+use ReflectionProperty;
+use TH\MAX\Client\DTO\Messages\Collection\MessageCollection;
+
 abstract class BaseDTO implements \JsonSerializable
 {
     protected array $_ignored = [];
 
     public function __construct(array $item = [])
     {
+//        if ($item['items'] instanceof MessageCollection) {
+//            print_r($item);
+//            exit;
+//        }
         $this->fromArray($item);
     }
 
@@ -31,15 +38,33 @@ abstract class BaseDTO implements \JsonSerializable
         return $items;
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function fromArray(array $data): self
     {
         foreach ($data as $name => $value) {
             if (property_exists($this, $name)) {
-                $this->$name = $value;
+                $reflection = new ReflectionProperty(get_class($this), $name);
+
+                $type = $reflection->getType()->getName();
+                if ($this->isPrimitiveType($type)) {
+                    $this->$name = $value;
+                }
+                else {
+                    /** @var BaseDTO $class */
+                    $class = new $type();
+                    $this->$name = $class->fromArray($value);
+                }
             }
         }
 
         return $this;
+    }
+
+    private function isPrimitiveType(string $type): bool
+    {
+        return in_array($type, ['int', 'float', 'bool', 'array', 'string']);
     }
 
     #[\ReturnTypeWillChange]

@@ -7,5 +7,5 @@ use TH\MAX\DTO\BaseDTO;
 
 class MessageListResponse extends BaseDTO
 {
-    public MessageCollection $items;
+    public MessageCollection $messages;
 }
