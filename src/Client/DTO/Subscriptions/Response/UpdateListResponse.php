@@ -7,7 +7,7 @@ use TH\MAX\DTO\BaseDTO;
 
 class UpdateListResponse extends BaseDTO
 {
-    public UpdateCollection $items;
+    public UpdateCollection $updates;
 
     public ?int $marker;
 }

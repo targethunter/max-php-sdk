@@ -16,7 +16,7 @@ class Upload extends CommonModule
     public function getUrl(string $type): UrlDTO
     {
         return new UrlDTO(
-            $this->post('/uploads', [
+            $this->post('/uploads', [], [
                 'type' => $type,
             ])
         );

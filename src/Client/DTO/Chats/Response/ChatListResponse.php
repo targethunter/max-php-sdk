@@ -7,7 +7,7 @@ use TH\MAX\DTO\BaseDTO;
 
 class ChatListResponse extends BaseDTO
 {
-    public ChatCollection $items;
+    public ChatCollection $chats;
 
     public int $marker;
 }

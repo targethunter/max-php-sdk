@@ -4,11 +4,9 @@ namespace TH\MAX\Client\Modules\Chats;
 
 use TH\MAX\Client\DTO\Chats\ChatDTO;
 use TH\MAX\Client\DTO\Chats\ChatMemberDTO;
-use TH\MAX\Client\DTO\Chats\Collection\ChatCollection;
-use TH\MAX\Client\DTO\Chats\Collection\ChatMemberCollection;
 use TH\MAX\Client\DTO\Chats\Response\ChatListResponse;
 use TH\MAX\Client\DTO\Chats\Response\ChatMemberListResponse;
-use TH\MAX\Client\DTO\Messages\MessageDTO;
+use TH\MAX\Client\DTO\Messages\Response\MessageResponse;
 use TH\MAX\Client\DTO\ResultResponse;
 use TH\MAX\Client\Modules\CommonModule;
 use TH\MAX\Interfaces\MAXRequestInterface;
@@ -26,8 +24,6 @@ class Chats extends CommonModule
             'count' => $count,
             'marker' => $marker
         ]);
-
-        $response['items'] = ChatCollection::fromArray($response['chats']);
 
         return new ChatListResponse($response);
     }
@@ -77,9 +73,9 @@ class Chats extends CommonModule
         );
     }
 
-    public function getPinnedMessage(int $chat_id): MessageDTO
+    public function getPinnedMessage(int $chat_id): MessageResponse
     {
-        return new MessageDTO(
+        return new MessageResponse(
             $this->get('/chats/' . $chat_id . '/pin')
         );
     }
@@ -123,8 +119,6 @@ class Chats extends CommonModule
     {
         $response = $this->get('/chats/' . $chat_id . '/members/admins');
 
-        $response['items'] = ChatMemberCollection::fromArray($response['members']);
-
         return new ChatMemberListResponse($response);
     }
 
@@ -161,8 +155,6 @@ class Chats extends CommonModule
             'marker' => $marker,
             'count' => $count
         ]);
-
-        $response['items'] = ChatMemberCollection::fromArray($response['members']);
 
         return new ChatMemberListResponse($response);
     }

@@ -7,5 +7,5 @@ use TH\MAX\DTO\BaseDTO;
 
 class SubscriptionListResponse extends BaseDTO
 {
-    public SubscriptionCollection $items;
+    public SubscriptionCollection $subscriptions;
 }

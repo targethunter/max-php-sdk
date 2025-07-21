@@ -32,13 +32,14 @@ class Messages extends CommonModule
             'count' => $count,
         ]);
 
-        $response['items'] = MessageCollection::fromArray($response['messages']);
-
         return new MessageListResponse($response);
     }
 
     public function send(
-        ?int $text = null,
+        ?int $user_id = null,
+        ?int $chat_id = null,
+        ?bool $disable_link_preview = null,
+        ?string $text = null,
         ?array $attachments = null,
         ?array $link = null,
         bool $notify = true,
@@ -51,6 +52,10 @@ class Messages extends CommonModule
                 'link' => $link,
                 'notify' => $notify,
                 'format' => $format,
+            ], [
+                'user_id' => $user_id,
+                'chat_id' => $chat_id,
+                'disable_link_preview' => $disable_link_preview,
             ])
         );
     }
