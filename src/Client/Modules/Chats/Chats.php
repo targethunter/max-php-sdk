@@ -115,14 +115,14 @@ class Chats extends CommonModule
         );
     }
 
-    public function getChatAdmins(int $chat_id): ChatMemberListResponse
+    public function getAdmins(int $chat_id): ChatMemberListResponse
     {
         $response = $this->get('/chats/' . $chat_id . '/members/admins');
 
         return new ChatMemberListResponse($response);
     }
 
-    public function assignChatAdmins(
+    public function assignAdmins(
         int $chat_id,
         array $admins,
         ?int $marker = null
@@ -136,14 +136,14 @@ class Chats extends CommonModule
         );
     }
 
-    public function revokeChatAdmin(int $chat_id, int $user_id): ResultResponse
+    public function revokeAdmin(int $chat_id, int $user_id): ResultResponse
     {
         return new ResultResponse(
             $this->delete('/chats/' . $chat_id . '/members/admins/' . $user_id)
         );
     }
 
-    public function getChatMembers(
+    public function getMembers(
         int $chat_id,
         ?array $user_ids = null,
         ?int $marker = null,
@@ -159,7 +159,7 @@ class Chats extends CommonModule
         return new ChatMemberListResponse($response);
     }
 
-    public function addChatMembers(int $chat_id, array $user_ids): ResultResponse
+    public function addMembers(int $chat_id, array $user_ids): ResultResponse
     {
         return new ResultResponse(
             $this->post('/chats/' . $chat_id . '/members', [
@@ -168,7 +168,7 @@ class Chats extends CommonModule
         );
     }
 
-    public function removeChatMember(
+    public function deleteMember(
         int $chat_id,
         int $user_id,
         ?bool $block = null
