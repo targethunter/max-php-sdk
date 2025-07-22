@@ -62,10 +62,10 @@ class MAXRequest implements MAXRequestInterface
     /**
      * @throws GuzzleException
      */
-    public function putJSON(string $method, array $params = [], array $headers = []): ResponseInterface
+    public function putJSON(string $method, array $params = [], array $query_params = [], array $headers = []): ResponseInterface
     {
         return $this->client->put($this->getURL($method), [
-            'query' => ['access_token' => $this->access_token],
+            'query' => array_merge($query_params, ['access_token' => $this->access_token]),
             'json' => $params,
             'headers' => $headers,
         ]);
@@ -89,8 +89,7 @@ class MAXRequest implements MAXRequestInterface
     public function deleteJSON(string $method, array $params = [], array $headers = []): ResponseInterface
     {
         return $this->client->delete($this->getURL($method), [
-            'query' => ['access_token' => $this->access_token],
-            'json' => $params,
+            'query' => array_merge($params, ['access_token' => $this->access_token]),
             'headers' => $headers,
         ]);
     }
