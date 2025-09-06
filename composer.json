@@ -1,28 +1,32 @@
 {
-    "name": "targehunter/max-php-sdk",
-    "description": "PHP SDK для API мессенджера MAX",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Ilya",
-            "email": "sokolov@targethunter.ru"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "TH\\MAX\\": "src/"
-        }
+  "name": "targethunter/max-php-sdk",
+  "description": "PHP SDK для API мессенджера MAX",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Ilya",
+      "email": "sokolov@targethunter.ru"
     },
-    "autoload-dev": {
-        "psr-4": {
-            "TH\\MAX\\Tests\\": "tests/"
-        }
-    },
-    "minimum-stability": "stable",
-    "require": {
-        "php": "^7.4|^8",
-        "guzzlehttp/guzzle": "^7.5",
-        "ext-json": "*"
+    {
+      "name": "Georgy",
+      "email": "georgy@targethunter.ru"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "TH\\MAX\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "TH\\MAX\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "php": "^7.4|^8",
+    "guzzlehttp/guzzle": "^7.5",
+    "ext-json": "*"
+  }
 }
