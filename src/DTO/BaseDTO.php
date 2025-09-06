@@ -3,18 +3,14 @@
 namespace TH\MAX\DTO;
 
 use ReflectionProperty;
-use TH\MAX\Client\DTO\Messages\Collection\MessageCollection;
 
 abstract class BaseDTO implements \JsonSerializable
 {
-    protected array $_ignored = [];
-
+    /**
+     * @throws \ReflectionException
+     */
     public function __construct(array $item = [])
     {
-//        if ($item['items'] instanceof MessageCollection) {
-//            print_r($item);
-//            exit;
-//        }
         $this->fromArray($item);
     }
 

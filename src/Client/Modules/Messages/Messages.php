@@ -37,9 +37,9 @@ class Messages extends CommonModule
     public function send(
         ?int $user_id = null,
         ?int $chat_id = null,
-        ?bool $disable_link_preview = null,
         ?string $text = null,
         ?array $attachments = null,
+        ?bool $disable_link_preview = null,
         ?array $link = null,
         bool $notify = true,
         ?string $format = null
