@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Subscriptions;
 
 use TH\MAX\DTO\BaseDTO;
 
-class SubscriptionDTO extends BaseDTO
+class Subscription extends BaseDTO
 {
     public string $url;
 

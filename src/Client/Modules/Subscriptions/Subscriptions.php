@@ -2,10 +2,7 @@
 
 namespace TH\MAX\Client\Modules\Subscriptions;
 
-use TH\MAX\Client\DTO\Bots\BotDTO;
 use TH\MAX\Client\DTO\ResultResponse;
-use TH\MAX\Client\DTO\Subscriptions\Collection\SubscriptionCollection;
-use TH\MAX\Client\DTO\Subscriptions\Collection\UpdateCollection;
 use TH\MAX\Client\DTO\Subscriptions\Response\SubscriptionListResponse;
 use TH\MAX\Client\DTO\Subscriptions\Response\UpdateListResponse;
 use TH\MAX\Client\Modules\CommonModule;
@@ -27,8 +24,7 @@ class Subscriptions extends CommonModule
         string $url,
         ?array $update_types = null,
         ?string $secret = null
-    ): ResultResponse
-    {
+    ): ResultResponse {
         return new ResultResponse(
             $this->post('/subscriptions', [
                 'url' => $url,
@@ -52,8 +48,7 @@ class Subscriptions extends CommonModule
         int $timeout = 30,
         ?int $marker = null,
         ?array $types = null
-    ): UpdateListResponse
-    {
+    ): UpdateListResponse {
         $response = $this->get('/updates', [
             'limit' => $limit,
             'timeout' => $timeout,

@@ -2,9 +2,9 @@
 
 namespace TH\MAX\Client\Modules\Messages;
 
-use TH\MAX\Client\DTO\Messages\MessageDTO;
+use TH\MAX\Client\DTO\Messages\Message;
 use TH\MAX\Client\DTO\Messages\Response\MessageListResponse;
-use TH\MAX\Client\DTO\Messages\VideoInfoDTO;
+use TH\MAX\Client\DTO\Messages\VideoInfo;
 use TH\MAX\Client\DTO\ResultResponse;
 use TH\MAX\Client\Modules\CommonModule;
 use TH\MAX\Interfaces\MAXRequestInterface;
@@ -43,8 +43,8 @@ class Messages extends CommonModule
         ?array $link = null,
         bool $notify = true,
         ?string $format = null
-    ): MessageDTO {
-        return new MessageDTO(
+    ): Message {
+        return new Message(
             $this->post('/messages', [
                 'text' => $text,
                 'attachments' => $attachments,
@@ -55,7 +55,7 @@ class Messages extends CommonModule
                 'user_id' => $user_id,
                 'chat_id' => $chat_id,
                 'disable_link_preview' => $disable_link_preview,
-            ])
+            ])['message'] ?? null,
         );
     }
 
@@ -89,18 +89,18 @@ class Messages extends CommonModule
         );
     }
 
-    public function getById(string $message_id): MessageDTO
+    public function getById(string $message_id): Message
     {
-        return new MessageDTO(
+        return new Message(
             $this->get('/messages/' . $message_id, [
                 'message_id' => $message_id,
             ])
         );
     }
 
-    public function getVideoInfo(string $video_token): VideoInfoDTO
+    public function getVideoInfo(string $video_token): VideoInfo
     {
-        return new VideoInfoDTO(
+        return new VideoInfo(
             $this->get('/videos/' . $video_token)
         );
     }

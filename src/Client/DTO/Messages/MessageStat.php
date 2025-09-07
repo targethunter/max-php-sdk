@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Messages;
 
 use TH\MAX\DTO\BaseDTO;
 
-class MessageStatDTO extends BaseDTO
+class MessageStat extends BaseDTO
 {
     public int $views;
 }

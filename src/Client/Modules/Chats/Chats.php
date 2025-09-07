@@ -2,8 +2,8 @@
 
 namespace TH\MAX\Client\Modules\Chats;
 
-use TH\MAX\Client\DTO\Chats\ChatDTO;
-use TH\MAX\Client\DTO\Chats\ChatMemberDTO;
+use TH\MAX\Client\DTO\Chats\Chat;
+use TH\MAX\Client\DTO\Chats\ChatMember;
 use TH\MAX\Client\DTO\Chats\Response\ChatListResponse;
 use TH\MAX\Client\DTO\Chats\Response\ChatMemberListResponse;
 use TH\MAX\Client\DTO\Messages\Response\MessageResponse;
@@ -28,16 +28,16 @@ class Chats extends CommonModule
         return new ChatListResponse($response);
     }
 
-    public function getByLink(string $chat_link): ChatDTO
+    public function getByLink(string $chat_link): Chat
     {
-        return new ChatDTO(
+        return new Chat(
             $this->get('/chats/' . $chat_link)
         );
     }
 
-    public function getById(int $chat_id): ChatDTO
+    public function getById(int $chat_id): Chat
     {
-        return new ChatDTO(
+        return new Chat(
             $this->get('/chats/' . $chat_id)
         );
     }
@@ -48,8 +48,8 @@ class Chats extends CommonModule
         ?string $title = null,
         ?string $pin = null,
         ?bool $notify = true
-    ): ChatDTO {
-        return new ChatDTO(
+    ): Chat {
+        return new Chat(
             $this->patch('/chats/' . $chat_id, [
                 'icon' => $icon,
                 'title' => $title,
@@ -59,13 +59,15 @@ class Chats extends CommonModule
         );
     }
 
-    public function remove(int $chat_id): ResultResponse {
+    public function remove(int $chat_id): ResultResponse
+    {
         return new ResultResponse(
             $this->delete('/chats/' . $chat_id)
         );
     }
 
-    public function sendAction(int $chat_id, string $action): ResultResponse {
+    public function sendAction(int $chat_id, string $action): ResultResponse
+    {
         return new ResultResponse(
             $this->post('/chats/' . $chat_id . '/actions', [
                 'action' => $action
@@ -84,8 +86,7 @@ class Chats extends CommonModule
         int $chat_id,
         string $message_id,
         bool $notify = true
-    ): ResultResponse
-    {
+    ): ResultResponse {
         return new ResultResponse(
             $this->put('/chats/' . $chat_id . '/pin', [
                 'message_id' => $message_id,
@@ -101,9 +102,9 @@ class Chats extends CommonModule
         );
     }
 
-    public function getBotMembership(int $chat_id): ChatMemberDTO
+    public function getBotMembership(int $chat_id): ChatMember
     {
-        return new ChatMemberDTO(
+        return new ChatMember(
             $this->get('/chats/' . $chat_id . '/members/me')
         );
     }
@@ -126,8 +127,7 @@ class Chats extends CommonModule
         int $chat_id,
         array $admins,
         ?int $marker = null
-    ): ResultResponse
-    {
+    ): ResultResponse {
         return new ResultResponse(
             $this->post('/chats/' . $chat_id . '/members/admins', [
                 'admins' => $admins,
@@ -148,8 +148,7 @@ class Chats extends CommonModule
         ?array $user_ids = null,
         ?int $marker = null,
         int $count = 20
-    ): ChatMemberListResponse
-    {
+    ): ChatMemberListResponse {
         $response = $this->get('/chats/' . $chat_id . '/members', [
             'user_ids' => $user_ids,
             'marker' => $marker,
