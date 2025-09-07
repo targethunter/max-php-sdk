@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Messages;
 
 use TH\MAX\DTO\BaseDTO;
 
-class VideoInfoDTO extends BaseDTO
+class VideoInfo extends BaseDTO
 {
     public string $token;
 

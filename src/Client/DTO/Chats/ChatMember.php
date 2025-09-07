@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Chats;
 
 use TH\MAX\DTO\BaseDTO;
 
-class ChatMemberDTO extends BaseDTO
+class ChatMember extends BaseDTO
 {
     public int $user_id;
 

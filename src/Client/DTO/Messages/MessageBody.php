@@ -4,7 +4,7 @@ namespace TH\MAX\Client\DTO\Messages;
 
 use TH\MAX\DTO\BaseDTO;
 
-class MessageBodyDTO extends BaseDTO
+class MessageBody extends BaseDTO
 {
     public string $mid;
 

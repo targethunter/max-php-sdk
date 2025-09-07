@@ -2,10 +2,10 @@
 
 namespace TH\MAX\Client\DTO\Chats;
 
-use TH\MAX\Client\DTO\Messages\MessageDTO;
+use TH\MAX\Client\DTO\Messages\Message;
 use TH\MAX\DTO\BaseDTO;
 
-class ChatDTO extends BaseDTO
+class Chat extends BaseDTO
 {
     public int $chat_id;
 
@@ -15,7 +15,7 @@ class ChatDTO extends BaseDTO
 
     public ?string $title;
 
-    public ?ImageDTO $icon;
+    public ?Image $icon;
 
     public int $last_event_time;
 
@@ -31,11 +31,11 @@ class ChatDTO extends BaseDTO
 
     public ?string $description;
 
-    public ?UserWithPhotoDTO $dialog_with_user;
+    public ?UserWithPhoto $dialog_with_user;
 
     public ?int $messages_count;
 
     public ?string $chat_message_id;
 
-    public ?MessageDTO $pinned_message;
+    public ?Message $pinned_message;
 }
