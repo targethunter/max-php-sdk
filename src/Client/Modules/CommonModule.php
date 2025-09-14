@@ -14,31 +14,31 @@ abstract class CommonModule
         $this->request = $request;
     }
 
-    protected function get(string $method, ?array $params = null): array
+    protected function getRequest(string $method, ?array $params = null): array
     {
         $response = $this->request->get($method, $params ?? []);
         return $this->getResponse($response);
     }
 
-    protected function post(string $method, ?array $params = null, ?array $query_params = null): array
+    protected function postRequest(string $method, ?array $params = null, ?array $query_params = null): array
     {
         $response = $this->request->postJSON($method, $params ?? [], $query_params ?? []);
         return $this->getResponse($response);
     }
 
-    protected function put(string $method, ?array $params = null, ?array $query_params = null): array
+    protected function putRequest(string $method, ?array $params = null, ?array $query_params = null): array
     {
         $response = $this->request->putJSON($method, $params ?? [], $query_params ?? []);
         return $this->getResponse($response);
     }
 
-    protected function patch(string $method, ?array $params = null): array
+    protected function patchRequest(string $method, ?array $params = null): array
     {
         $response = $this->request->patchJSON($method, $params ?? []);
         return $this->getResponse($response);
     }
 
-    protected function delete(string $method, ?array $params = null): array
+    protected function deleteRequest(string $method, ?array $params = null): array
     {
         $response = $this->request->deleteJSON($method, $params ?? []);
         return $this->getResponse($response);

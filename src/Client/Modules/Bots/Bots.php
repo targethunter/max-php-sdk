@@ -15,7 +15,7 @@ class Bots extends CommonModule
 
     public function getMe(): Bot
     {
-        return new Bot($this->get('/me'));
+        return new Bot($this->getRequest('/me'));
     }
 
     public function update(
@@ -26,7 +26,7 @@ class Bots extends CommonModule
         ?array $commands = null,
         ?string $photo = null
     ): Bot {
-        return new Bot($this->patch('/me', [
+        return new Bot($this->patchRequest('/me', [
             'first_name' => $first_name,
             'last_name' => $last_name,
             'name' => $name,

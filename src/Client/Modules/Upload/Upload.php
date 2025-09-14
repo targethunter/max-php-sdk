@@ -16,7 +16,7 @@ class Upload extends CommonModule
     public function getUrl(string $type): Url
     {
         return new Url(
-            $this->post('/uploads', [], [
+            $this->postRequest('/uploads', [], [
                 'type' => $type,
             ])
         );
