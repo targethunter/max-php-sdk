@@ -239,7 +239,11 @@ SDK обрабатывает различные форматы ошибок от
 
 ## Конфигурация
 
+### Базовый URL API
+
 По умолчанию SDK использует базовый URL API: `https://botapi.max.ru/`
+
+### Кастомный HTTP клиент
 
 Вы можете создать собственный HTTP клиент и передать его в конструктор `MAXRequest`:
 
@@ -253,6 +257,37 @@ $customClient = new Client([
 
 $request = new MAXRequest($accessToken, $customClient);
 $client = new MAXClient($request);
+```
+
+### Кастомизация через наследование
+
+Если вам нужно изменить поведение SDK (например, использовать другой URL API или отключить автоматическую обработку ошибок), вы можете унаследоваться от `MAXRequest` и переопределить нужные методы:
+
+#### Пример кастомизации
+
+```php
+use GuzzleHttp\Exception\GuzzleException;
+use TH\MAX\Client\Request\MAXRequest;
+use TH\MAX\Exceptions\MAXHttpException;
+
+class FullyCustomMAXRequest extends MAXRequest
+{
+    protected function getURL(string $method): string
+    {
+        // Кастомный URL с дополнительными параметрами
+        $baseUrl = 'https://api.max.ru/v2/';
+        return $baseUrl . ltrim($method, '/') . '?version=2.0';
+    }
+
+    protected function toMAXHttpException(GuzzleException $e): MAXHttpException
+    {
+        // Кастомная обработка ошибок
+        $code = 500; // Всегда возвращаем 500 для внутренних ошибок
+        $msg = 'Произошла ошибка при обращении к API';
+        
+        return new MAXHttpException($msg, $code, $e);
+    }
+}
 ```
 
 ## Полный пример использования
