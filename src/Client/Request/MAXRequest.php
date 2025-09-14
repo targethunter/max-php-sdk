@@ -119,12 +119,12 @@ class MAXRequest implements MAXRequestInterface
         }
     }
 
-    private function getURL(string $method): string
+    protected function getURL(string $method): string
     {
         return MAXConfig::API_URL . ltrim($method, '/');
     }
 
-    private function toMAXHttpException(GuzzleException $e): MAXHttpException
+    protected function toMAXHttpException(GuzzleException $e): MAXHttpException
     {
         $code = method_exists($e, 'getResponse') && $e->getResponse()
             ? $e->getResponse()->getStatusCode()
