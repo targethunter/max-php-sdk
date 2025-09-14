@@ -17,7 +17,7 @@ class Subscriptions extends CommonModule
 
     public function getAll(): SubscriptionListResponse
     {
-        return new SubscriptionListResponse($this->get('/subscriptions'));
+        return new SubscriptionListResponse($this->getRequest('/subscriptions'));
     }
 
     public function subscribe(
@@ -26,7 +26,7 @@ class Subscriptions extends CommonModule
         ?string $secret = null
     ): ResultResponse {
         return new ResultResponse(
-            $this->post('/subscriptions', [
+            $this->postRequest('/subscriptions', [
                 'url' => $url,
                 'update_types' => $update_types,
                 'secret' => $secret,
@@ -37,7 +37,7 @@ class Subscriptions extends CommonModule
     public function unsubscribe(string $url): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/subscriptions', [
+            $this->deleteRequest('/subscriptions', [
                 'url' => $url,
             ])
         );
@@ -49,7 +49,7 @@ class Subscriptions extends CommonModule
         ?int $marker = null,
         ?array $types = null
     ): UpdateListResponse {
-        $response = $this->get('/updates', [
+        $response = $this->getRequest('/updates', [
             'limit' => $limit,
             'timeout' => $timeout,
             'marker' => $marker,

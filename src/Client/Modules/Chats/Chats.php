@@ -20,7 +20,7 @@ class Chats extends CommonModule
 
     public function getAll(int $count = 50, ?int $marker = null): ChatListResponse
     {
-        $response = $this->get('/chats', [
+        $response = $this->getRequest('/chats', [
             'count' => $count,
             'marker' => $marker
         ]);
@@ -31,14 +31,14 @@ class Chats extends CommonModule
     public function getByLink(string $chat_link): Chat
     {
         return new Chat(
-            $this->get('/chats/' . $chat_link)
+            $this->getRequest('/chats/' . $chat_link)
         );
     }
 
     public function getById(int $chat_id): Chat
     {
         return new Chat(
-            $this->get('/chats/' . $chat_id)
+            $this->getRequest('/chats/' . $chat_id)
         );
     }
 
@@ -50,7 +50,7 @@ class Chats extends CommonModule
         ?bool $notify = true
     ): Chat {
         return new Chat(
-            $this->patch('/chats/' . $chat_id, [
+            $this->patchRequest('/chats/' . $chat_id, [
                 'icon' => $icon,
                 'title' => $title,
                 'pin' => $pin,
@@ -59,17 +59,17 @@ class Chats extends CommonModule
         );
     }
 
-    public function remove(int $chat_id): ResultResponse
+    public function delete(int $chat_id): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/chats/' . $chat_id)
+            $this->deleteRequest('/chats/' . $chat_id)
         );
     }
 
     public function sendAction(int $chat_id, string $action): ResultResponse
     {
         return new ResultResponse(
-            $this->post('/chats/' . $chat_id . '/actions', [
+            $this->postRequest('/chats/' . $chat_id . '/actions', [
                 'action' => $action
             ])
         );
@@ -78,7 +78,7 @@ class Chats extends CommonModule
     public function getPinnedMessage(int $chat_id): MessageResponse
     {
         return new MessageResponse(
-            $this->get('/chats/' . $chat_id . '/pin')
+            $this->getRequest('/chats/' . $chat_id . '/pin')
         );
     }
 
@@ -88,7 +88,7 @@ class Chats extends CommonModule
         bool $notify = true
     ): ResultResponse {
         return new ResultResponse(
-            $this->put('/chats/' . $chat_id . '/pin', [
+            $this->putRequest('/chats/' . $chat_id . '/pin', [
                 'message_id' => $message_id,
                 'notify' => $notify
             ])
@@ -98,27 +98,27 @@ class Chats extends CommonModule
     public function deletePinnedMessage(int $chat_id): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/chats/' . $chat_id . '/pin')
+            $this->deleteRequest('/chats/' . $chat_id . '/pin')
         );
     }
 
     public function getBotMembership(int $chat_id): ChatMember
     {
         return new ChatMember(
-            $this->get('/chats/' . $chat_id . '/members/me')
+            $this->getRequest('/chats/' . $chat_id . '/members/me')
         );
     }
 
     public function deleteBot(int $chat_id): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/chats/' . $chat_id . '/members/me')
+            $this->deleteRequest('/chats/' . $chat_id . '/members/me')
         );
     }
 
     public function getAdmins(int $chat_id): ChatMemberListResponse
     {
-        $response = $this->get('/chats/' . $chat_id . '/members/admins');
+        $response = $this->getRequest('/chats/' . $chat_id . '/members/admins');
 
         return new ChatMemberListResponse($response);
     }
@@ -129,7 +129,7 @@ class Chats extends CommonModule
         ?int $marker = null
     ): ResultResponse {
         return new ResultResponse(
-            $this->post('/chats/' . $chat_id . '/members/admins', [
+            $this->postRequest('/chats/' . $chat_id . '/members/admins', [
                 'admins' => $admins,
                 'marker' => $marker
             ])
@@ -139,7 +139,7 @@ class Chats extends CommonModule
     public function revokeAdmin(int $chat_id, int $user_id): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/chats/' . $chat_id . '/members/admins/' . $user_id)
+            $this->deleteRequest('/chats/' . $chat_id . '/members/admins/' . $user_id)
         );
     }
 
@@ -149,7 +149,7 @@ class Chats extends CommonModule
         ?int $marker = null,
         int $count = 20
     ): ChatMemberListResponse {
-        $response = $this->get('/chats/' . $chat_id . '/members', [
+        $response = $this->getRequest('/chats/' . $chat_id . '/members', [
             'user_ids' => $user_ids,
             'marker' => $marker,
             'count' => $count
@@ -161,7 +161,7 @@ class Chats extends CommonModule
     public function addMembers(int $chat_id, array $user_ids): ResultResponse
     {
         return new ResultResponse(
-            $this->post('/chats/' . $chat_id . '/members', [
+            $this->postRequest('/chats/' . $chat_id . '/members', [
                 'user_ids' => $user_ids
             ])
         );
@@ -173,7 +173,7 @@ class Chats extends CommonModule
         ?bool $block = null
     ): ResultResponse {
         return new ResultResponse(
-            $this->delete('/chats/' . $chat_id . '/members', [
+            $this->deleteRequest('/chats/' . $chat_id . '/members', [
                 'user_id' => $user_id,
                 'block' => $block
             ])

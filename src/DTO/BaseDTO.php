@@ -14,11 +14,9 @@ abstract class BaseDTO implements \JsonSerializable
         $this->fromArray($item);
     }
 
-    public function toArray(bool $without_null = true, bool $recursive = false): array
+    public function toArray(bool $recursive = true, bool $without_null = true): array
     {
         $items = get_object_vars($this);
-
-        unset($items['_ignored']);
 
         foreach ($items as $key => $value) {
             if ($without_null && $value === null) {

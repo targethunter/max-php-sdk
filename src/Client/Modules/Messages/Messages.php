@@ -23,7 +23,7 @@ class Messages extends CommonModule
         ?int $to = null,
         int $count = 50
     ): MessageListResponse {
-        $response = $this->get('/messages', [
+        $response = $this->getRequest('/messages', [
             'chat_id' => $chat_id,
             'message_ids' => $message_ids,
             'from' => $from,
@@ -45,7 +45,7 @@ class Messages extends CommonModule
         ?string $format = null
     ): Message {
         return new Message(
-            $this->post('/messages', [
+            $this->postRequest('/messages', [
                 'text' => $text,
                 'attachments' => $attachments,
                 'link' => $link,
@@ -68,7 +68,7 @@ class Messages extends CommonModule
         ?string $format = null
     ): ResultResponse {
         return new ResultResponse(
-            $this->put('/messages', [
+            $this->putRequest('/messages', [
                 'text' => $text,
                 'attachments' => $attachments,
                 'link' => $link,
@@ -80,10 +80,10 @@ class Messages extends CommonModule
         );
     }
 
-    public function remove(string $message_id): ResultResponse
+    public function delete(string $message_id): ResultResponse
     {
         return new ResultResponse(
-            $this->delete('/messages', [
+            $this->deleteRequest('/messages', [
                 'message_id' => $message_id,
             ])
         );
@@ -92,7 +92,7 @@ class Messages extends CommonModule
     public function getById(string $message_id): Message
     {
         return new Message(
-            $this->get('/messages/' . $message_id, [
+            $this->getRequest('/messages/' . $message_id, [
                 'message_id' => $message_id,
             ])
         );
@@ -101,7 +101,7 @@ class Messages extends CommonModule
     public function getVideoInfo(string $video_token): VideoInfo
     {
         return new VideoInfo(
-            $this->get('/videos/' . $video_token)
+            $this->getRequest('/videos/' . $video_token)
         );
     }
 
@@ -111,7 +111,7 @@ class Messages extends CommonModule
         ?string $notification = null
     ): ResultResponse {
         return new ResultResponse(
-            $this->post('/answers', [
+            $this->postRequest('/answers', [
                 'callback_id' => $callback_id,
                 'message' => $message,
                 'notification' => $notification,
