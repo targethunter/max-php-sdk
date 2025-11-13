@@ -6,5 +6,5 @@ namespace TH\MAX\Config;
 
 class MAXConfig
 {
-    const API_URL = 'https://botapi.max.ru/';
+    const API_URL = 'https://platform-api.max.ru/';
 }
