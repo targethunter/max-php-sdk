@@ -150,7 +150,7 @@ class Chats extends CommonModule
         int $count = 20
     ): ChatMemberListResponse {
         $response = $this->getRequest('/chats/' . $chat_id . '/members', [
-            'user_ids' => $user_ids,
+            'user_ids' => implode(',', $user_ids),
             'marker' => $marker,
             'count' => $count
         ]);
