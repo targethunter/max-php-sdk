@@ -221,9 +221,10 @@ try {
     
     // Получить оригинальное исключение Guzzle для отладки
     if ($e->hasOriginalException()) {
-        $originalException = $e->getOriginalException();
-        // Дополнительная отладочная информация
+        $original = $e->getOriginalException();
     }
+    // Или через стандартную цепочку исключений
+    $previous = $e->getPrevious();
 }
 ```
 
@@ -261,34 +262,41 @@ $client = new MAXClient($request);
 
 ### Кастомизация через наследование
 
-Если вам нужно изменить поведение SDK (например, использовать другой URL API или отключить автоматическую обработку ошибок), вы можете унаследоваться от `MAXRequest` и переопределить нужные методы:
+Вы можете унаследоваться от `MAXRequest` и переопределить нужные методы:
 
-#### Пример кастомизации
+#### Кастомный URL API
+
+```php
+use TH\MAX\Client\Request\MAXRequest;
+
+class CustomMAXRequest extends MAXRequest
+{
+    protected function getURL(string $method): string
+    {
+        return 'https://api.max.ru/v2/' . ltrim($method, '/');
+    }
+}
+```
+
+#### Кастомный класс исключений
+
+Метод `createException()` — фабрика для создания исключений. Переопределите его, чтобы SDK бросал ваши доменные исключения вместо `MAXHttpException`:
 
 ```php
 use GuzzleHttp\Exception\GuzzleException;
 use TH\MAX\Client\Request\MAXRequest;
-use TH\MAX\Exceptions\MAXHttpException;
 
-class FullyCustomMAXRequest extends MAXRequest
+class AppMAXRequest extends MAXRequest
 {
-    protected function getURL(string $method): string
+    protected function createException(string $message, int $code, GuzzleException $original): \Throwable
     {
-        // Кастомный URL с дополнительными параметрами
-        $baseUrl = 'https://api.max.ru/v2/';
-        return $baseUrl . ltrim($method, '/') . '?version=2.0';
-    }
-
-    protected function toMAXHttpException(GuzzleException $e): MAXHttpException
-    {
-        // Кастомная обработка ошибок
-        $code = 500; // Всегда возвращаем 500 для внутренних ошибок
-        $msg = 'Произошла ошибка при обращении к API';
-        
-        return new MAXHttpException($msg, $code, $e);
+        // Бросаем ваше доменное исключение вместо MAXHttpException
+        return new \App\Exceptions\ApiException($message, $code, $original);
     }
 }
 ```
+
+Логика парсинга ответа API (извлечение человекочитаемого сообщения из JSON) остаётся в SDK — вы получаете готовое сообщение в параметре `$message`.
 
 ## Полный пример использования
 

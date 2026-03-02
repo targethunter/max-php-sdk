@@ -13,7 +13,7 @@ class MAXHttpException extends RuntimeException
 
     public function __construct(string $message, int $code = 0, ?GuzzleException $originalException = null)
     {
-        parent::__construct($message, $code);
+        parent::__construct($message, $code, $originalException);
         $this->originalException = $originalException;
     }
 
