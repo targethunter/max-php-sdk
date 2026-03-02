@@ -124,7 +124,7 @@ class MAXRequest implements MAXRequestInterface
         return MAXConfig::API_URL . ltrim($method, '/');
     }
 
-    protected function toMAXHttpException(GuzzleException $e): MAXHttpException
+    protected function toMAXHttpException(GuzzleException $e): \Throwable
     {
         $code = method_exists($e, 'getResponse') && $e->getResponse()
             ? $e->getResponse()->getStatusCode()
@@ -149,6 +149,20 @@ class MAXRequest implements MAXRequestInterface
             }
         }
 
-        return new MAXHttpException($msg, $code, $e);
+        return $this->createException($msg, $code, $e);
+    }
+
+    /**
+     * Фабричный метод для создания исключения.
+     * Переопределите для использования собственного класса исключений.
+     *
+     * @param string $message Человекочитаемое сообщение об ошибке
+     * @param int $code HTTP-код ответа
+     * @param GuzzleException $original Оригинальное исключение Guzzle
+     * @return \Throwable
+     */
+    protected function createException(string $message, int $code, GuzzleException $original): \Throwable
+    {
+        return new MAXHttpException($message, $code, $original);
     }
 }
