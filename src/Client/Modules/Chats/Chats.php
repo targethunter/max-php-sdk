@@ -149,11 +149,16 @@ class Chats extends CommonModule
         ?int $marker = null,
         int $count = 20
     ): ChatMemberListResponse {
-        $response = $this->getRequest('/chats/' . $chat_id . '/members', [
-            'user_ids' => implode(',', $user_ids),
+        $params = [
             'marker' => $marker,
-            'count' => $count
-        ]);
+            'count' => $count,
+        ];
+
+        if ($user_ids !== null) {
+            $params['user_ids'] = implode(',', $user_ids);
+        }
+
+        $response = $this->getRequest('/chats/' . $chat_id . '/members', $params);
 
         return new ChatMemberListResponse($response);
     }
