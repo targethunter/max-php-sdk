@@ -92,9 +92,7 @@ class Messages extends CommonModule
     public function getById(string $message_id): Message
     {
         return new Message(
-            $this->getRequest('/messages/' . $message_id, [
-                'message_id' => $message_id,
-            ])
+            $this->getRequest('/messages/' . $message_id)
         );
     }
 
@@ -112,9 +110,10 @@ class Messages extends CommonModule
     ): ResultResponse {
         return new ResultResponse(
             $this->postRequest('/answers', [
-                'callback_id' => $callback_id,
                 'message' => $message,
                 'notification' => $notification,
+            ], [
+                'callback_id' => $callback_id,
             ])
         );
     }
