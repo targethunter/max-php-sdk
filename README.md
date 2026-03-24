@@ -242,7 +242,7 @@ SDK обрабатывает различные форматы ошибок от
 
 ### Базовый URL API
 
-По умолчанию SDK использует базовый URL API: `https://botapi.max.ru/`
+По умолчанию SDK использует базовый URL API: `https://platform-api.max.ru/`
 
 ### Кастомный HTTP клиент
 
