@@ -32,8 +32,8 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->get($this->getURL($method), [
-                'query' => array_merge($params, ['access_token' => $this->access_token]),
-                'headers' => $headers,
+                'query' => $params,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
@@ -47,9 +47,8 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->post($this->getURL($method), [
-                'query' => ['access_token' => $this->access_token],
                 'form_params' => $params,
-                'headers' => $headers,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
@@ -63,9 +62,9 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->post($this->getURL($method), [
-                'query' => array_merge($query_params, ['access_token' => $this->access_token]),
+                'query' => $query_params,
                 'json' => $params,
-                'headers' => $headers,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
@@ -79,9 +78,9 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->put($this->getURL($method), [
-                'query' => array_merge($query_params, ['access_token' => $this->access_token]),
+                'query' => $query_params,
                 'json' => $params,
-                'headers' => $headers,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
@@ -95,9 +94,8 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->patch($this->getURL($method), [
-                'query' => ['access_token' => $this->access_token],
                 'json' => $params,
-                'headers' => $headers,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
@@ -111,12 +109,18 @@ class MAXRequest implements MAXRequestInterface
     {
         try {
             return $this->client->delete($this->getURL($method), [
-                'query' => array_merge($params, ['access_token' => $this->access_token]),
-                'headers' => $headers,
+                'query' => $params,
+                'headers' => $this->withAuth($headers),
             ]);
         } catch (GuzzleException $e) {
             throw $this->toMAXHttpException($e);
         }
+    }
+
+    protected function withAuth(array $headers): array
+    {
+        $headers['Authorization'] = $this->access_token;
+        return $headers;
     }
 
     protected function getURL(string $method): string
