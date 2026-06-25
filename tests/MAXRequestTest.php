@@ -132,6 +132,28 @@ class MAXRequestTest extends TestCase
         $this->assertStringContainsString('foo=bar', $query);
     }
 
+    public function testDefaultBaseUrlUsesPlatformApi2Host(): void
+    {
+        $historyContainer = [];
+        $mock = new MockHandler([
+            new Response(200, [], '{}'),
+        ]);
+        $handler = HandlerStack::create($mock);
+        $handler->push(\GuzzleHttp\Middleware::history($historyContainer));
+        $client = new Client(['handler' => $handler]);
+
+        $request = new MAXRequest('my_secret_token', $client);
+        $request->get('me');
+
+        $this->assertCount(1, $historyContainer);
+
+        $sentRequest = $historyContainer[0]['request'];
+        $this->assertSame('https', $sentRequest->getUri()->getScheme());
+        $this->assertSame('platform-api2.max.ru', $sentRequest->getUri()->getHost());
+        $this->assertSame('/me', $sentRequest->getUri()->getPath());
+        $this->assertSame('my_secret_token', $sentRequest->getHeaderLine('Authorization'));
+    }
+
     public function testCreateExceptionCanBeOverridden(): void
     {
         $customRequest = new class('token') extends MAXRequest {
