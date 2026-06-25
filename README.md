@@ -58,18 +58,6 @@ SDK разделен на несколько модулей, для удобст
 $bot = $client->bots()->getMe();
 echo "ID бота: " . $bot->id;
 echo "Имя: " . $bot->name;
-
-// Обновить информацию о боте
-$updatedBot = $client->bots()->update(
-    first_name: 'Мой',
-    last_name: 'Бот',
-    name: 'my_bot',
-    description: 'Описание моего бота',
-    commands: [
-        ['command' => 'start', 'description' => 'Запустить бота'],
-        ['command' => 'help', 'description' => 'Показать помощь']
-    ]
-);
 ```
 
 ### 2. Модуль Messages (Сообщения)
@@ -117,9 +105,6 @@ $message = $client->messages()->getById('message_123');
 #### Примеры:
 
 ```php
-// Получить список чатов
-$chats = $client->chats()->getAll(count: 50);
-
 // Получить чат по ID
 $chat = $client->chats()->getById(12345);
 echo "Название чата: " . $chat->title;
@@ -320,20 +305,13 @@ try {
     // Получить информацию о боте
     $bot = $client->bots()->getMe();
     echo "Бот: " . $bot->name . "\n";
-    
-    // Получить список чатов
-    $chats = $client->chats()->getAll(count: 10);
-    echo "Найдено чатов: " . count($chats->chats) . "\n";
-    
-    // Отправить сообщение в первый чат
-    if (!empty($chats->chats)) {
-        $firstChat = $chats->chats[0];
-        $message = $client->messages()->send(
-            chat_id: $firstChat->id,
-            text: 'Привет из PHP SDK!'
-        );
-        echo "Сообщение отправлено с ID: " . $message->id . "\n";
-    }
+
+    // Отправить сообщение в известный чат
+    $message = $client->messages()->send(
+        chat_id: 12345,
+        text: 'Привет из PHP SDK!'
+    );
+    echo "Сообщение отправлено с ID: " . $message->id . "\n";
     
 } catch (MAXHttpException $e) {
     echo "Ошибка API MAX: " . $e->getMessage() . "\n";
