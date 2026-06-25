@@ -132,6 +132,9 @@ class MAXRequestTest extends TestCase
         $this->assertStringContainsString('foo=bar', $query);
     }
 
+    /**
+     * @see https://dev.max.ru/docs-api/methods/GET/me
+     */
     public function testDefaultBaseUrlUsesPlatformApi2Host(): void
     {
         $historyContainer = [];

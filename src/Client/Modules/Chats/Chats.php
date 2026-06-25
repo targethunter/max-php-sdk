@@ -10,6 +10,9 @@ use TH\MAX\Client\DTO\ResultResponse;
 use TH\MAX\Client\Modules\CommonModule;
 use TH\MAX\Interfaces\MAXRequestInterface;
 
+/**
+ * @see https://dev.max.ru/docs-api/methods/GET/chats GET /chats is no longer supported.
+ */
 class Chats extends CommonModule
 {
     public function __construct(MAXRequestInterface $request)

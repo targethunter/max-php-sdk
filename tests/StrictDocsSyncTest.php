@@ -12,6 +12,10 @@ use TH\MAX\Config\UploadTypes;
 
 class StrictDocsSyncTest extends TestCase
 {
+    /**
+     * @see https://dev.max.ru/docs-api/methods/GET/chats GET /chats is no longer supported.
+     * @see https://dev.max.ru/docs-api/methods/GET/me Bots API documents GET /me, not PATCH /me.
+     */
     public function testUnsupportedMethodsAreRemovedFromPublicModules(): void
     {
         $this->assertFalse(method_exists(Chats::class, 'getAll'));
@@ -19,6 +23,9 @@ class StrictDocsSyncTest extends TestCase
         $this->assertFalse(method_exists(Bots::class, 'update'));
     }
 
+    /**
+     * @see https://dev.max.ru/docs-api/methods/POST/uploads
+     */
     public function testUploadTypesExposeOnlyDocumentedTypes(): void
     {
         $reflection = new \ReflectionClass(UploadTypes::class);
@@ -33,6 +40,9 @@ class StrictDocsSyncTest extends TestCase
         $this->assertFalse($reflection->hasConstant('PHOTO'));
     }
 
+    /**
+     * @see https://dev.max.ru/docs-api/methods/POST/messages Inline keyboard buttons are sent through POST /messages.
+     */
     public function testClipboardButtonSerializesToDocumentedShape(): void
     {
         $button = new ClipboardButton([
