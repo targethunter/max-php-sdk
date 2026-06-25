@@ -43,6 +43,22 @@ echo "Имя бота: " . $bot->name;
 echo "Описание: " . $bot->description;
 ```
 
+## Миграция на v2.0.0
+
+Версия `v2.0.0` приводит публичный API SDK к актуальной документации MAX API.
+
+Breaking changes:
+
+- Удален `Chats::getAll()`: метод `GET /chats` больше не поддерживается MAX API. Получайте `chat_id` через Webhook-подписки или Long Polling в окружениях разработки.
+- Удален `Chats::delete()`: метод `DELETE /chats/{chatId}` отсутствует в актуальной документации MAX API.
+- Удален `Bots::update()`: метод `PATCH /me` отсутствует в актуальной документации MAX API.
+
+Новые возможности:
+
+- `UploadTypes` содержит документированные типы загрузки: `image`, `video`, `audio`, `file`.
+- `ClipboardButton` добавляет кнопку inline-клавиатуры с типом `clipboard`.
+- `WebhookSecretVerifier` помогает проверить заголовок `X-Max-Bot-Api-Secret`.
+
 ## Модули API
 
 SDK разделен на несколько модулей, для удобства использования. Модули реализованы так же, как в официальном API MAX.
@@ -143,8 +159,10 @@ $result = $client->chats()->pinMessage(
 #### Примеры:
 
 ```php
+use TH\MAX\Config\UploadTypes;
+
 // Получить URL для загрузки изображения
-$uploadUrl = $client->upload()->getUrl('image');
+$uploadUrl = $client->upload()->getUrl(UploadTypes::IMAGE);
 echo "URL для загрузки: " . $uploadUrl->url;
 
 // Получить URL для загрузки файла
@@ -154,6 +172,10 @@ $uploadUrl = $client->upload()->getUrl('file');
 ### 5. Модуль Subscriptions (Подписки)
 
 Управление webhook подписками.
+
+Для production-окружения MAX рекомендует использовать Webhook. Long Polling через `getUpdates()` оставлен в SDK, потому что метод документирован, но его стоит использовать только для разработки и тестирования.
+
+Webhook endpoint должен использовать HTTPS, доверенный сертификат и порт 443. Если при подписке указан `secret`, проверяйте входящий заголовок `X-Max-Bot-Api-Secret`.
 
 #### Примеры:
 
@@ -177,6 +199,15 @@ $result = $client->subscriptions()->unsubscribe(
 $updates = $client->subscriptions()->getUpdates(
     limit: 100,
     timeout: 30
+);
+```
+
+```php
+use TH\MAX\Webhook\WebhookSecretVerifier;
+
+$isValid = WebhookSecretVerifier::verifyFromHeaders(
+    getallheaders(),
+    'your_secret_key'
 );
 ```
 
@@ -230,6 +261,8 @@ SDK обрабатывает различные форматы ошибок от
 По умолчанию SDK использует базовый URL API: `https://platform-api2.max.ru/`
 
 > Начиная с версии `v1.3.0`, SDK по умолчанию использует `platform-api2.max.ru`, как указано в актуальной документации MAX API.
+
+Документация MAX указывает лимит для `platform-api2.max.ru`: до 30 запросов в секунду.
 
 ### Кастомный HTTP клиент
 
