@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace TH\MAX\Tests;
 
 use PHPUnit\Framework\TestCase;
+use TH\MAX\Client\DTO\Messages\Attachments\Buttons\ClipboardButton;
 use TH\MAX\Client\Modules\Bots\Bots;
 use TH\MAX\Client\Modules\Chats\Chats;
 use TH\MAX\Config\UploadTypes;
@@ -30,5 +31,19 @@ class StrictDocsSyncTest extends TestCase
         ], $reflection->getConstants());
 
         $this->assertFalse($reflection->hasConstant('PHOTO'));
+    }
+
+    public function testClipboardButtonSerializesToDocumentedShape(): void
+    {
+        $button = new ClipboardButton([
+            'text' => 'Copy',
+            'payload' => 'PROMO-123',
+        ]);
+
+        $this->assertSame([
+            'type' => 'clipboard',
+            'text' => 'Copy',
+            'payload' => 'PROMO-123',
+        ], $button->toArray());
     }
 }
