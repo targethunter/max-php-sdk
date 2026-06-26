@@ -13,27 +13,11 @@ class Bots extends CommonModule
         parent::__construct($request);
     }
 
+    /**
+     * @see https://dev.max.ru/docs-api/methods/GET/me
+     */
     public function getMe(): Bot
     {
         return new Bot($this->getRequest('/me'));
-    }
-
-    public function update(
-        ?string $first_name = null,
-        ?string $last_name = null,
-        ?string $name = null,
-        ?string $description = null,
-        ?array $commands = null,
-        ?string $photo = null
-    ): Bot {
-        return new Bot($this->patchRequest('/me', [
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'name' => $name,
-            'description' => $description,
-            'commands' => $commands,
-            'photo' => $photo
-        ])
-        );
     }
 }

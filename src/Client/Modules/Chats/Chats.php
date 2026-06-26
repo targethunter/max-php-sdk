@@ -4,28 +4,20 @@ namespace TH\MAX\Client\Modules\Chats;
 
 use TH\MAX\Client\DTO\Chats\Chat;
 use TH\MAX\Client\DTO\Chats\ChatMember;
-use TH\MAX\Client\DTO\Chats\Response\ChatListResponse;
 use TH\MAX\Client\DTO\Chats\Response\ChatMemberListResponse;
 use TH\MAX\Client\DTO\Messages\Response\MessageResponse;
 use TH\MAX\Client\DTO\ResultResponse;
 use TH\MAX\Client\Modules\CommonModule;
 use TH\MAX\Interfaces\MAXRequestInterface;
 
+/**
+ * @see https://dev.max.ru/docs-api/methods/GET/chats GET /chats is no longer supported.
+ */
 class Chats extends CommonModule
 {
     public function __construct(MAXRequestInterface $request)
     {
         parent::__construct($request);
-    }
-
-    public function getAll(int $count = 50, ?int $marker = null): ChatListResponse
-    {
-        $response = $this->getRequest('/chats', [
-            'count' => $count,
-            'marker' => $marker
-        ]);
-
-        return new ChatListResponse($response);
     }
 
     public function getByLink(string $chat_link): Chat
@@ -56,13 +48,6 @@ class Chats extends CommonModule
                 'pin' => $pin,
                 'notify' => $notify
             ])
-        );
-    }
-
-    public function delete(int $chat_id): ResultResponse
-    {
-        return new ResultResponse(
-            $this->deleteRequest('/chats/' . $chat_id)
         );
     }
 

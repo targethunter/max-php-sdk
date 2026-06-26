@@ -43,6 +43,22 @@ echo "Имя бота: " . $bot->name;
 echo "Описание: " . $bot->description;
 ```
 
+## Миграция на v2.0.0
+
+Версия `v2.0.0` приводит публичный API SDK к актуальной документации MAX API.
+
+Breaking changes:
+
+- Удален `Chats::getAll()`: метод `GET /chats` больше не поддерживается MAX API. Получайте `chat_id` через Webhook-подписки или Long Polling в окружениях разработки.
+- Удален `Chats::delete()`: метод `DELETE /chats/{chatId}` отсутствует в актуальной документации MAX API.
+- Удален `Bots::update()`: метод `PATCH /me` отсутствует в актуальной документации MAX API.
+
+Новые возможности:
+
+- `UploadTypes` содержит документированные типы загрузки: `image`, `video`, `audio`, `file`.
+- `ClipboardButton` добавляет кнопку inline-клавиатуры с типом `clipboard`.
+- `WebhookSecretVerifier` помогает проверить заголовок `X-Max-Bot-Api-Secret`.
+
 ## Модули API
 
 SDK разделен на несколько модулей, для удобства использования. Модули реализованы так же, как в официальном API MAX.
@@ -58,18 +74,6 @@ SDK разделен на несколько модулей, для удобст
 $bot = $client->bots()->getMe();
 echo "ID бота: " . $bot->id;
 echo "Имя: " . $bot->name;
-
-// Обновить информацию о боте
-$updatedBot = $client->bots()->update(
-    first_name: 'Мой',
-    last_name: 'Бот',
-    name: 'my_bot',
-    description: 'Описание моего бота',
-    commands: [
-        ['command' => 'start', 'description' => 'Запустить бота'],
-        ['command' => 'help', 'description' => 'Показать помощь']
-    ]
-);
 ```
 
 ### 2. Модуль Messages (Сообщения)
@@ -117,9 +121,6 @@ $message = $client->messages()->getById('message_123');
 #### Примеры:
 
 ```php
-// Получить список чатов
-$chats = $client->chats()->getAll(count: 50);
-
 // Получить чат по ID
 $chat = $client->chats()->getById(12345);
 echo "Название чата: " . $chat->title;
@@ -158,8 +159,10 @@ $result = $client->chats()->pinMessage(
 #### Примеры:
 
 ```php
+use TH\MAX\Config\UploadTypes;
+
 // Получить URL для загрузки изображения
-$uploadUrl = $client->upload()->getUrl('image');
+$uploadUrl = $client->upload()->getUrl(UploadTypes::IMAGE);
 echo "URL для загрузки: " . $uploadUrl->url;
 
 // Получить URL для загрузки файла
@@ -169,6 +172,10 @@ $uploadUrl = $client->upload()->getUrl('file');
 ### 5. Модуль Subscriptions (Подписки)
 
 Управление webhook подписками.
+
+Для production-окружения MAX рекомендует использовать Webhook. Long Polling через `getUpdates()` оставлен в SDK, потому что метод документирован, но его стоит использовать только для разработки и тестирования.
+
+Webhook endpoint должен использовать HTTPS, доверенный сертификат и порт 443. Если при подписке указан `secret`, проверяйте входящий заголовок `X-Max-Bot-Api-Secret`.
 
 #### Примеры:
 
@@ -192,6 +199,15 @@ $result = $client->subscriptions()->unsubscribe(
 $updates = $client->subscriptions()->getUpdates(
     limit: 100,
     timeout: 30
+);
+```
+
+```php
+use TH\MAX\Webhook\WebhookSecretVerifier;
+
+$isValid = WebhookSecretVerifier::verifyFromHeaders(
+    getallheaders(),
+    'your_secret_key'
 );
 ```
 
@@ -245,6 +261,8 @@ SDK обрабатывает различные форматы ошибок от
 По умолчанию SDK использует базовый URL API: `https://platform-api2.max.ru/`
 
 > Начиная с версии `v1.3.0`, SDK по умолчанию использует `platform-api2.max.ru`, как указано в актуальной документации MAX API.
+
+Документация MAX указывает лимит для `platform-api2.max.ru`: до 30 запросов в секунду.
 
 ### Кастомный HTTP клиент
 
@@ -320,20 +338,13 @@ try {
     // Получить информацию о боте
     $bot = $client->bots()->getMe();
     echo "Бот: " . $bot->name . "\n";
-    
-    // Получить список чатов
-    $chats = $client->chats()->getAll(count: 10);
-    echo "Найдено чатов: " . count($chats->chats) . "\n";
-    
-    // Отправить сообщение в первый чат
-    if (!empty($chats->chats)) {
-        $firstChat = $chats->chats[0];
-        $message = $client->messages()->send(
-            chat_id: $firstChat->id,
-            text: 'Привет из PHP SDK!'
-        );
-        echo "Сообщение отправлено с ID: " . $message->id . "\n";
-    }
+
+    // Отправить сообщение в известный чат
+    $message = $client->messages()->send(
+        chat_id: 12345,
+        text: 'Привет из PHP SDK!'
+    );
+    echo "Сообщение отправлено с ID: " . $message->id . "\n";
     
 } catch (MAXHttpException $e) {
     echo "Ошибка API MAX: " . $e->getMessage() . "\n";
