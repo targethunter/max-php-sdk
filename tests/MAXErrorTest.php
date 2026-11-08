@@ -10,8 +10,10 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\NoSeekStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Utils;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use TH\MAX\Client\Request\MAXRequest;
@@ -31,6 +33,7 @@ class MAXErrorTest extends TestCase
         return [
             'неверный токен по коду' => [401, 'verify.token', 'Invalid access_token', MAXErrorReason::TOKEN_INVALID, []],
             'неверный токен по тексту' => [0, null, 'Invalid access_token', MAXErrorReason::TOKEN_INVALID, []],
+            'неверный токен по HTTP-коду' => [401, null, 'Unauthorized', MAXErrorReason::TOKEN_INVALID, []],
             'бот заблокирован' => [0, null, 'Account was blocked', MAXErrorReason::BOT_BLOCKED, []],
             'диалог остановлен, обёртка Key' => [
                 0, null, 'Key: error.dialog.suspended, args: [123456,].', MAXErrorReason::DIALOG_SUSPENDED, [],
@@ -38,6 +41,9 @@ class MAXErrorTest extends TestCase
             'диалог остановлен' => [0, null, 'error.dialog.suspended', MAXErrorReason::DIALOG_SUSPENDED, []],
             'диалога нет' => [0, null, 'error.dialog.notfound', MAXErrorReason::DIALOG_NOT_FOUND, []],
             'чат не найден' => [0, null, 'Chat 123456 not found', MAXErrorReason::CHAT_NOT_FOUND, ['chat_id' => 123456]],
+            'групповой чат не найден' => [
+                0, null, 'Chat -70123456789 not found', MAXErrorReason::CHAT_NOT_FOUND, ['chat_id' => -70123456789],
+            ],
             'не найдено' => [0, null, 'error.not.found', MAXErrorReason::NOT_FOUND, []],
             'бот ботам' => [
                 0, null, 'errors.send-message.bot-to-bot.restriction', MAXErrorReason::BOT_TO_BOT, [],
@@ -73,8 +79,11 @@ class MAXErrorTest extends TestCase
                 0, null, 'errors.process.attachment.file.not.processed', MAXErrorReason::ATTACHMENT_NOT_READY, [],
             ],
             'токен вложения' => [0, null, 'Invalid `token`: f1LHodD2', MAXErrorReason::ATTACHMENT_INVALID, []],
-            'токен фото' => [0, null, 'Invalid photo token provided', MAXErrorReason::ATTACHMENT_INVALID, []],
-            'нет токена вложения' => [0, null, 'Missing `token` or `fileId`', MAXErrorReason::ATTACHMENT_INVALID, []],
+            'токен фото' => [0, null, 'Invalid photo token provided', MAXErrorReason::ATTACHMENT_MALFORMED, []],
+            'нет токена вложения' => [0, null, 'Missing `token` or `fileId`', MAXErrorReason::ATTACHMENT_MALFORMED, []],
+            'нет файла во вложении' => [
+                0, null, 'No `photos`, `url` or `token` provided', MAXErrorReason::ATTACHMENT_MALFORMED, [],
+            ],
             'нажатие устарело' => [
                 0, null, 'Missing required parameter: callback_id', MAXErrorReason::CALLBACK_EXPIRED, [],
             ],
@@ -98,6 +107,9 @@ class MAXErrorTest extends TestCase
             ],
             'пустой ответ' => [0, null, 'cURL error 52: Empty reply from server', MAXErrorReason::EMPTY_RESPONSE, []],
             'сбой сервера' => [502, null, 'Bad Gateway', MAXErrorReason::SERVER_ERROR, []],
+            'внутренняя ошибка сервера' => [500, null, 'Internal Server Error', MAXErrorReason::SERVER_ERROR, []],
+            'сервис недоступен' => [503, null, 'Service Unavailable', MAXErrorReason::SERVER_ERROR, []],
+            'сервер не дождался' => [504, null, 'Gateway Timeout', MAXErrorReason::SERVER_ERROR, []],
         ];
     }
 
@@ -141,7 +153,7 @@ class MAXErrorTest extends TestCase
             MAXErrorTranslator::translate(MAXError::fromMessage("Field 'text' size (4003) must be at most 4000"))
         );
         $this->assertSame(
-            'MAX ограничил частоту запросов: не больше 30 в секунду. Повторите попытку чуть позже.',
+            'MAX ограничил частоту запросов: не больше 30 запросов в секунду. Повторите попытку чуть позже.',
             MAXErrorTranslator::translate(MAXError::fromMessage('Too many requests. Limit is: 30 calls per second.'))
         );
         $this->assertSame(
@@ -198,6 +210,42 @@ class MAXErrorTest extends TestCase
             $error = MAXError::fromThrowable($e);
             $this->assertSame('bad.request', $error->getErrorCode());
             $this->assertSame(MAXErrorReason::DIALOG_SUSPENDED, $error->getReason());
+        }
+    }
+
+    public function testParamWithBraceIsSubstituted(): void
+    {
+        $this->assertSame(
+            'Не заполнено обязательное поле «payload{0}». Заполните его.',
+            MAXErrorTranslator::translate(MAXError::fromMessage('payload{0}: errors.required'))
+        );
+    }
+
+    public function testParsesThrowableWithoutGuzzleException(): void
+    {
+        $error = MAXError::fromThrowable(new \RuntimeException('Account was blocked'));
+        $this->assertSame(0, $error->getStatus());
+        $this->assertSame(MAXErrorReason::BOT_BLOCKED, $error->getReason());
+
+        $error = (new MAXHttpException('error.not.found', 404))->getError();
+        $this->assertSame(404, $error->getStatus());
+        $this->assertSame(MAXErrorReason::NOT_FOUND, $error->getReason());
+    }
+
+    public function testErrorIsParsedOnceForNonRewindableBody(): void
+    {
+        $body = new NoSeekStream(Utils::streamFor('{"code":"bad.request","message":"Key: error.dialog.suspended, args: [1,]."}'));
+        $request = $this->createRequest(MAXRequest::class, [
+            new RequestException('Client error', new Request('POST', 'messages'), new Response(400, [], $body)),
+        ]);
+
+        try {
+            $request->postJSON('messages', ['text' => 'hi']);
+            $this->fail('Expected MAXHttpException');
+        } catch (MAXHttpException $e) {
+            $this->assertSame('Key: error.dialog.suspended, args: [1,].', $e->getMessage());
+            $this->assertSame('bad.request', $e->getError()->getErrorCode());
+            $this->assertSame(MAXErrorReason::DIALOG_SUSPENDED, $e->getError()->getReason());
         }
     }
 

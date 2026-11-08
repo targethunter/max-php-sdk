@@ -61,6 +61,9 @@ final class MAXErrorReason
     /** Токен вложения недействителен */
     public const ATTACHMENT_INVALID = 'attachment_invalid';
 
+    /** Во вложении нет файла или его токена */
+    public const ATTACHMENT_MALFORMED = 'attachment_malformed';
+
     /** Ответ на нажатие кнопки опоздал */
     public const CALLBACK_EXPIRED = 'callback_expired';
 

@@ -17,25 +17,25 @@ final class MAXErrorTranslator
      * все параметры из фигурных скобок.
      */
     private const MESSAGES_RU = [
-        MAXErrorReason::TOKEN_INVALID => 'Токен бота недействителен или отозван. Проверьте токен и подключите бота заново.',
-        MAXErrorReason::BOT_BLOCKED => 'Аккаунт бота в MAX заблокирован. Проверьте состояние бота в MAX и подключите его заново.',
+        MAXErrorReason::TOKEN_INVALID => 'Токен бота недействителен или отозван. Проверьте токен бота.',
+        MAXErrorReason::BOT_BLOCKED => 'Аккаунт бота в MAX заблокирован. Проверьте состояние бота в MAX.',
         MAXErrorReason::DIALOG_SUSPENDED =>
             'Пользователь остановил диалог с ботом, поэтому сообщения ему не доставляются. Исправлять ничего не нужно.',
         MAXErrorReason::DIALOG_NOT_FOUND =>
             'Диалог с пользователем не найден: пользователь ещё не писал боту или удалил переписку.',
-        MAXErrorReason::CHAT_NOT_FOUND => 'Чат не найден: его удалили или бота в нём больше нет.',
+        MAXErrorReason::CHAT_NOT_FOUND => 'Чат не найден: его удалили или бота в нём нет.',
         MAXErrorReason::NOT_FOUND => 'MAX не нашёл указанный чат, пользователя или сообщение.',
         MAXErrorReason::BOT_TO_BOT => 'MAX не разрешает ботам отправлять сообщения другим ботам.',
         MAXErrorReason::RATE_LIMITED => [
-            'MAX ограничил частоту запросов: не больше {limit} в секунду. Повторите попытку чуть позже.',
+            'MAX ограничил частоту запросов: не больше {limit} запросов в секунду. Повторите попытку чуть позже.',
             'MAX ограничил частоту запросов. Повторите попытку чуть позже.',
         ],
         MAXErrorReason::TEXT_EMPTY => 'MAX не принимает сообщение без текста. Добавьте текст сообщения.',
-        MAXErrorReason::FIELD_REQUIRED => 'Не заполнено обязательное поле сообщения «{field}».',
+        MAXErrorReason::FIELD_REQUIRED => 'Не заполнено обязательное поле «{field}». Заполните его.',
         MAXErrorReason::TEXT_TOO_LONG => 'Текст сообщения длиннее {limit} символов (сейчас {size}). Сократите текст.',
         MAXErrorReason::FIELD_TOO_LONG => [
             'Значение поля «{field}» длиннее допустимого: {size} при пределе {limit}. Сократите его.',
-            'Одно из полей сообщения длиннее допустимого. Сократите его.',
+            'Одно из значений в запросе длиннее допустимого. Сократите его.',
         ],
         MAXErrorReason::BUTTON_LINK_INVALID =>
             'В кнопках-ссылках допустимы только адреса, начинающиеся с http:// или https://. Исправьте ссылку в кнопке.',
@@ -44,6 +44,7 @@ final class MAXErrorTranslator
         MAXErrorReason::FILE_EMPTY => 'Файл пустой. Загрузите файл с содержимым.',
         MAXErrorReason::ATTACHMENT_NOT_READY => 'Вложение ещё обрабатывается в MAX. Повторите отправку чуть позже.',
         MAXErrorReason::ATTACHMENT_INVALID => 'Вложение недоступно: его токен недействителен. Загрузите файл заново.',
+        MAXErrorReason::ATTACHMENT_MALFORMED => 'MAX не принял вложение: в запросе нет файла или его токена.',
         MAXErrorReason::CALLBACK_EXPIRED => 'Нажатие кнопки устарело: ответить на него уже нельзя.',
         MAXErrorReason::NOT_FOR_DIALOGS =>
             'Действие доступно только в групповом чате, в личном диалоге его выполнить нельзя.',
@@ -54,9 +55,11 @@ final class MAXErrorTranslator
         MAXErrorReason::NO_RIGHTS_DELETE_COMMENT =>
             'У бота нет прав удалить комментарий: нужны права администратора канала на удаление.',
         MAXErrorReason::WRITE_NEEDS_READ => 'Нельзя назначить эти права без права «Читать сообщения».',
-        MAXErrorReason::TIMEOUT => 'MAX не ответил вовремя. Повторите попытку позже.',
-        MAXErrorReason::EMPTY_RESPONSE => 'MAX вернул пустой ответ. Повторите попытку позже.',
-        MAXErrorReason::SERVER_ERROR => 'Сервер MAX временно недоступен. Повторите попытку позже.',
+        // При обрыве связи MAX мог уже выполнить запрос: повтор отправки даст дубль
+        MAXErrorReason::TIMEOUT => 'MAX не ответил вовремя: запрос мог не выполниться. Проверьте результат, прежде чем повторять.',
+        MAXErrorReason::EMPTY_RESPONSE =>
+            'MAX вернул пустой ответ: запрос мог не выполниться. Проверьте результат, прежде чем повторять.',
+        MAXErrorReason::SERVER_ERROR => 'На стороне MAX произошла ошибка. Попробуйте позже.',
     ];
 
     /**
@@ -67,14 +70,15 @@ final class MAXErrorTranslator
         $variants = (array)(self::MESSAGES_RU[$error->getReason()] ?? []);
         $params = $error->getParams();
 
+        $replace = [];
+        foreach ($params as $name => $value) {
+            $replace['{' . $name . '}'] = (string)$value;
+        }
+
         foreach ($variants as $text) {
-            $replace = [];
-            foreach ($params as $name => $value) {
-                $replace['{' . $name . '}'] = (string)$value;
-            }
-            $result = strtr($text, $replace);
-            if (strpos($result, '{') === false) {
-                return $result;
+            preg_match_all('/\{(\w+)\}/', $text, $matches);
+            if (array_diff($matches[1], array_keys($params)) === []) {
+                return strtr($text, $replace);
             }
         }
 

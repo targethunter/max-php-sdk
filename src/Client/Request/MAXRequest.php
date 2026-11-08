@@ -133,8 +133,12 @@ class MAXRequest implements MAXRequestInterface
     {
         // Текст ошибки — из полей ответа MAX, а если ответ не JSON — сырое тело
         $error = MAXError::fromGuzzleException($e);
+        $exception = $this->createException($error->getMessage(), $error->getStatus(), $e);
+        if ($exception instanceof MAXHttpException) {
+            $exception->setError($error);
+        }
 
-        return $this->createException($error->getMessage(), $error->getStatus(), $e);
+        return $exception;
     }
 
     /**

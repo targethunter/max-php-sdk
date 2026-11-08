@@ -40,4 +40,14 @@ class MAXHttpException extends RuntimeException
 
         return $this->error;
     }
+
+    /**
+     * Ошибку разбирает MAXRequest один раз и кладёт сюда: тело ответа можно прочитать не всегда дважды.
+     *
+     * @internal
+     */
+    public function setError(MAXError $error): void
+    {
+        $this->error = $error;
+    }
 }

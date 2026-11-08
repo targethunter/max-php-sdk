@@ -43,7 +43,7 @@ final class MAXErrorRules
             'reason' => MAXErrorReason::FIELD_TOO_LONG,
             'pattern' => "/Field '(?<field>[^']+)' size \\((?<size>\\d+)\\) must be at most (?<limit>\\d+)/",
         ],
-        ['reason' => MAXErrorReason::FIELD_TOO_LONG, 'pattern' => '/must be at most/'],
+        ['reason' => MAXErrorReason::FIELD_TOO_LONG, 'pattern' => '/\bsize\b.*must be at most/'],
         ['reason' => MAXErrorReason::BUTTON_LINK_INVALID, 'pattern' => '/Must have only http\/https links format in buttons/'],
         ['reason' => MAXErrorReason::ONE_FILE_ONLY, 'pattern' => '/Must be only one file attachment in message/'],
         ['reason' => MAXErrorReason::FILE_EMPTY, 'pattern' => '/Zero file content in direct mode/'],
@@ -52,9 +52,12 @@ final class MAXErrorRules
             'reason' => MAXErrorReason::ATTACHMENT_NOT_READY,
             'pattern' => '/\berrors\.process\.attachment\.file\.not\.processed\b/',
         ],
+        // Токен загруженного файла устарел или неверен
+        ['reason' => MAXErrorReason::ATTACHMENT_INVALID, 'pattern' => '/^Invalid `token`/'],
+        // Во вложении нет файла или его токена — ошибка сборки запроса
         [
-            'reason' => MAXErrorReason::ATTACHMENT_INVALID,
-            'pattern' => '/^Invalid `token`|Invalid photo token provided|Missing `token` or `fileId`|No `photos`, `url` or `token` provided/',
+            'reason' => MAXErrorReason::ATTACHMENT_MALFORMED,
+            'pattern' => '/Invalid photo token provided|Missing `token` or `fileId`|No `photos`, `url` or `token` provided/',
         ],
         ['reason' => MAXErrorReason::CALLBACK_EXPIRED, 'pattern' => '/Missing required parameter: callback_id/'],
         ['reason' => MAXErrorReason::NOT_FOR_DIALOGS, 'pattern' => '/Method is not available for dialogs/'],
@@ -104,7 +107,7 @@ final class MAXErrorRules
         $params = [];
         foreach ($matches as $name => $value) {
             if (is_string($name)) {
-                $params[$name] = ctype_digit($value) ? (int)$value : $value;
+                $params[$name] = preg_match('/^-?\d+$/', $value) ? (int)$value : $value;
             }
         }
 
