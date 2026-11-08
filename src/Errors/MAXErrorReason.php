@@ -64,8 +64,8 @@ final class MAXErrorReason
     /** Во вложении нет файла или его токена */
     public const ATTACHMENT_MALFORMED = 'attachment_malformed';
 
-    /** Ответ на нажатие кнопки опоздал */
-    public const CALLBACK_EXPIRED = 'callback_expired';
+    /** Идентификатор нажатия кнопки не передан или уже недействителен */
+    public const CALLBACK_INVALID = 'callback_invalid';
 
     /** Действие работает только в групповом чате */
     public const NOT_FOR_DIALOGS = 'not_for_dialogs';

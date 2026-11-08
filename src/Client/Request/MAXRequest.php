@@ -135,7 +135,7 @@ class MAXRequest implements MAXRequestInterface
         $error = MAXError::fromGuzzleException($e);
         $exception = $this->createException($error->getMessage(), $error->getStatus(), $e);
         if ($exception instanceof MAXHttpException) {
-            $exception->setError($error);
+            $exception->setMAXError($error);
         }
 
         return $exception;

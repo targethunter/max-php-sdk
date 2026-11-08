@@ -53,13 +53,13 @@ final class MAXErrorRules
             'pattern' => '/\berrors\.process\.attachment\.file\.not\.processed\b/',
         ],
         // Токен загруженного файла устарел или неверен
-        ['reason' => MAXErrorReason::ATTACHMENT_INVALID, 'pattern' => '/^Invalid `token`/'],
+        ['reason' => MAXErrorReason::ATTACHMENT_INVALID, 'pattern' => '/^Invalid `token`|Invalid photo token provided/'],
         // Во вложении нет файла или его токена — ошибка сборки запроса
         [
             'reason' => MAXErrorReason::ATTACHMENT_MALFORMED,
-            'pattern' => '/Invalid photo token provided|Missing `token` or `fileId`|No `photos`, `url` or `token` provided/',
+            'pattern' => '/Missing `token` or `fileId`|No `photos`, `url` or `token` provided/',
         ],
-        ['reason' => MAXErrorReason::CALLBACK_EXPIRED, 'pattern' => '/Missing required parameter: callback_id/'],
+        ['reason' => MAXErrorReason::CALLBACK_INVALID, 'pattern' => '/Missing required parameter: callback_id/'],
         ['reason' => MAXErrorReason::NOT_FOR_DIALOGS, 'pattern' => '/Method is not available for dialogs/'],
         ['reason' => MAXErrorReason::NO_RIGHTS_DELETE_MESSAGE, 'pattern' => '/Insufficient permissions to delete message/'],
         ['reason' => MAXErrorReason::NO_RIGHTS_DELETE_COMMENT, 'pattern' => '/Insufficient permissions to delete comment/'],
@@ -73,7 +73,8 @@ final class MAXErrorRules
         ['reason' => MAXErrorReason::SERVER_ERROR, 'status' => 500],
         ['reason' => MAXErrorReason::SERVER_ERROR, 'status' => 502],
         ['reason' => MAXErrorReason::SERVER_ERROR, 'status' => 503],
-        ['reason' => MAXErrorReason::SERVER_ERROR, 'status' => 504],
+        // Шлюз MAX не дождался ответа — тот же таймаут: запрос мог выполниться
+        ['reason' => MAXErrorReason::TIMEOUT, 'status' => 504],
     ];
 
     /**
@@ -89,7 +90,7 @@ final class MAXErrorRules
                 continue;
             }
             $matches = [];
-            if (isset($rule['pattern']) && !preg_match($rule['pattern'], $message, $matches)) {
+            if (isset($rule['pattern']) && !preg_match($rule['pattern'], $message, $matches, PREG_UNMATCHED_AS_NULL)) {
                 continue;
             }
 
@@ -106,7 +107,8 @@ final class MAXErrorRules
     {
         $params = [];
         foreach ($matches as $name => $value) {
-            if (is_string($name)) {
+            // Не совпавшая необязательная группа приходит null — такого параметра нет
+            if (is_string($name) && $value !== null) {
                 $params[$name] = preg_match('/^-?\d+$/', $value) ? (int)$value : $value;
             }
         }

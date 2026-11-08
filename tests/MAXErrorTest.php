@@ -79,13 +79,13 @@ class MAXErrorTest extends TestCase
                 0, null, 'errors.process.attachment.file.not.processed', MAXErrorReason::ATTACHMENT_NOT_READY, [],
             ],
             'токен вложения' => [0, null, 'Invalid `token`: f1LHodD2', MAXErrorReason::ATTACHMENT_INVALID, []],
-            'токен фото' => [0, null, 'Invalid photo token provided', MAXErrorReason::ATTACHMENT_MALFORMED, []],
+            'токен фото' => [0, null, 'Invalid photo token provided', MAXErrorReason::ATTACHMENT_INVALID, []],
             'нет токена вложения' => [0, null, 'Missing `token` or `fileId`', MAXErrorReason::ATTACHMENT_MALFORMED, []],
             'нет файла во вложении' => [
                 0, null, 'No `photos`, `url` or `token` provided', MAXErrorReason::ATTACHMENT_MALFORMED, [],
             ],
-            'нажатие устарело' => [
-                0, null, 'Missing required parameter: callback_id', MAXErrorReason::CALLBACK_EXPIRED, [],
+            'нет идентификатора нажатия' => [
+                0, null, 'Missing required parameter: callback_id', MAXErrorReason::CALLBACK_INVALID, [],
             ],
             'не для диалогов' => [0, null, 'Method is not available for dialogs', MAXErrorReason::NOT_FOR_DIALOGS, []],
             'нет прав' => [
@@ -109,7 +109,7 @@ class MAXErrorTest extends TestCase
             'сбой сервера' => [502, null, 'Bad Gateway', MAXErrorReason::SERVER_ERROR, []],
             'внутренняя ошибка сервера' => [500, null, 'Internal Server Error', MAXErrorReason::SERVER_ERROR, []],
             'сервис недоступен' => [503, null, 'Service Unavailable', MAXErrorReason::SERVER_ERROR, []],
-            'сервер не дождался' => [504, null, 'Gateway Timeout', MAXErrorReason::SERVER_ERROR, []],
+            'шлюз не дождался' => [504, null, 'Gateway Timeout', MAXErrorReason::TIMEOUT, []],
         ];
     }
 
@@ -164,6 +164,9 @@ class MAXErrorTest extends TestCase
 
     public function testUnknownErrorHasNoTranslation(): void
     {
+        // Общее правило длины — только про размер, не про любой верхний предел
+        $this->assertSame(MAXErrorReason::UNKNOWN, MAXError::fromMessage('count must be at most 100', 400)->getReason());
+
         $error = MAXError::fromMessage('Something new happened', 400);
 
         $this->assertSame(MAXErrorReason::UNKNOWN, $error->getReason());
@@ -187,9 +190,9 @@ class MAXErrorTest extends TestCase
         } catch (MAXHttpException $e) {
             $this->assertSame('Invalid access_token', $e->getMessage());
             $this->assertSame(401, $e->getCode());
-            $this->assertSame('verify.token', $e->getError()->getErrorCode());
-            $this->assertSame(401, $e->getError()->getStatus());
-            $this->assertSame(MAXErrorReason::TOKEN_INVALID, $e->getError()->getReason());
+            $this->assertSame('verify.token', $e->getMAXError()->getErrorCode());
+            $this->assertSame(401, $e->getMAXError()->getStatus());
+            $this->assertSame(MAXErrorReason::TOKEN_INVALID, $e->getMAXError()->getReason());
         }
     }
 
@@ -216,7 +219,7 @@ class MAXErrorTest extends TestCase
     public function testParamWithBraceIsSubstituted(): void
     {
         $this->assertSame(
-            'Не заполнено обязательное поле «payload{0}». Заполните его.',
+            'MAX не принял запрос: не заполнено обязательное поле «payload{0}».',
             MAXErrorTranslator::translate(MAXError::fromMessage('payload{0}: errors.required'))
         );
     }
@@ -227,7 +230,7 @@ class MAXErrorTest extends TestCase
         $this->assertSame(0, $error->getStatus());
         $this->assertSame(MAXErrorReason::BOT_BLOCKED, $error->getReason());
 
-        $error = (new MAXHttpException('error.not.found', 404))->getError();
+        $error = (new MAXHttpException('error.not.found', 404))->getMAXError();
         $this->assertSame(404, $error->getStatus());
         $this->assertSame(MAXErrorReason::NOT_FOUND, $error->getReason());
     }
@@ -244,8 +247,8 @@ class MAXErrorTest extends TestCase
             $this->fail('Expected MAXHttpException');
         } catch (MAXHttpException $e) {
             $this->assertSame('Key: error.dialog.suspended, args: [1,].', $e->getMessage());
-            $this->assertSame('bad.request', $e->getError()->getErrorCode());
-            $this->assertSame(MAXErrorReason::DIALOG_SUSPENDED, $e->getError()->getReason());
+            $this->assertSame('bad.request', $e->getMAXError()->getErrorCode());
+            $this->assertSame(MAXErrorReason::DIALOG_SUSPENDED, $e->getMAXError()->getReason());
         }
     }
 
@@ -274,9 +277,9 @@ class MAXErrorTest extends TestCase
             $request->get('me');
             $this->fail('Expected MAXHttpException');
         } catch (MAXHttpException $e) {
-            $this->assertSame(0, $e->getError()->getStatus());
-            $this->assertNull($e->getError()->getErrorCode());
-            $this->assertSame(MAXErrorReason::TIMEOUT, $e->getError()->getReason());
+            $this->assertSame(0, $e->getMAXError()->getStatus());
+            $this->assertNull($e->getMAXError()->getErrorCode());
+            $this->assertSame(MAXErrorReason::TIMEOUT, $e->getMAXError()->getReason());
         }
     }
 

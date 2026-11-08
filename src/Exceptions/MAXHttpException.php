@@ -32,7 +32,7 @@ class MAXHttpException extends RuntimeException
     /**
      * Ошибка в разобранном виде: код MAX, причина и параметры.
      */
-    public function getError(): MAXError
+    public function getMAXError(): MAXError
     {
         if ($this->error === null) {
             $this->error = MAXError::fromThrowable($this);
@@ -46,7 +46,7 @@ class MAXHttpException extends RuntimeException
      *
      * @internal
      */
-    public function setError(MAXError $error): void
+    public function setMAXError(MAXError $error): void
     {
         $this->error = $error;
     }

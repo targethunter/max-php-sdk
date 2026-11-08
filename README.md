@@ -266,7 +266,7 @@ use TH\MAX\Exceptions\MAXHttpException;
 try {
     $client->messages()->send(user_id: 12345, text: $text);
 } catch (MAXHttpException $e) {
-    $error = $e->getError();
+    $error = $e->getMAXError();
 
     $error->getStatus();     // 400 — HTTP-код; 0, если ответа не было (сбой сети)
     $error->getErrorCode();  // поле code ответа MAX или null
@@ -286,7 +286,7 @@ try {
 - `MAXErrorTranslator::translate()` возвращает `null`, если ошибка не распознана. Тогда покажите исходный текст `$e->getMessage()`.
 - Тексты не привязаны к продукту. Нужен совет про свой интерфейс — подставьте свой текст по `getReason()`.
 - Для уже сохранённого текста ошибки, без ответа MAX: `MAXError::fromMessage($text)`.
-- Если вы бросаете свой класс исключения через `createException()`, разберите его так: `MAXError::fromThrowable($e)`. Ответ MAX найдётся в цепочке `getPrevious()`.
+- Если вы бросаете свой класс исключения через `createException()`, разберите его так: `MAXError::fromThrowable($e)`. Ответ MAX найдётся в цепочке `getPrevious()`. Тело ответа при этом читается ещё раз: у обычного клиента Guzzle это работает, а при `'stream' => true` код MAX и причина по тексту потеряются — останется только разбор по HTTP-коду.
 
 ## Конфигурация
 
