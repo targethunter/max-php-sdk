@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use TH\MAX\Config\MAXConfig;
+use TH\MAX\Errors\MAXError;
 use TH\MAX\Exceptions\MAXHttpException;
 use TH\MAX\Interfaces\MAXRequestInterface;
 
@@ -130,30 +131,10 @@ class MAXRequest implements MAXRequestInterface
 
     protected function toMAXHttpException(GuzzleException $e): \Throwable
     {
-        $code = method_exists($e, 'getResponse') && $e->getResponse()
-            ? $e->getResponse()->getStatusCode()
-            : (is_int($e->getCode()) ? $e->getCode() : 0);
+        // Текст ошибки — из полей ответа MAX, а если ответ не JSON — сырое тело
+        $error = MAXError::fromGuzzleException($e);
 
-        $msg = $e->getMessage();
-
-        // Если есть тело ответа — попробуем вытащить человекочитаемое сообщение
-        if (method_exists($e, 'getResponse') && ($resp = $e->getResponse())) {
-            $raw = (string)$resp->getBody();
-            $data = json_decode($raw, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
-                // Популярные поля для MAX API
-                $msg = $data['message']
-                    ?? $data['error']['message']
-                    ?? $data['error']['description']
-                    ?? $data['description']
-                    ?? $msg;
-            }
-            elseif ($raw) {
-                $msg = $raw; // не JSON — отдадим сырое тело
-            }
-        }
-
-        return $this->createException($msg, $code, $e);
+        return $this->createException($error->getMessage(), $error->getStatus(), $e);
     }
 
     /**
