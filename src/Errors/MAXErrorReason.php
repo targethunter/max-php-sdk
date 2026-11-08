@@ -49,7 +49,7 @@ final class MAXErrorReason
     /** В кнопке-ссылке адрес не http(s) */
     public const BUTTON_LINK_INVALID = 'button_link_invalid';
 
-    /** Файл вместе с другими вложениями */
+    /** Файл вместе с другими вложениями: файлами, изображениями или видео */
     public const ONE_FILE_ONLY = 'one_file_only';
 
     /** Пустой файл */
