@@ -252,6 +252,62 @@ class MAXErrorTest extends TestCase
         }
     }
 
+    public function testTranslationIsOffByDefault(): void
+    {
+        try {
+            $this->createRequest(MAXRequest::class, [self::tokenError()])->get('me');
+            $this->fail('Expected MAXHttpException');
+        } catch (MAXHttpException $e) {
+            $this->assertSame('Invalid access_token', $e->getMessage());
+        }
+    }
+
+    public function testTranslatesExceptionMessageWhenEnabled(): void
+    {
+        try {
+            $this->createRequest(MAXRequest::class, [self::tokenError()], true)->get('me');
+            $this->fail('Expected MAXHttpException');
+        } catch (MAXHttpException $e) {
+            $this->assertSame('Токен бота недействителен или отозван. Проверьте токен бота.', $e->getMessage());
+            $this->assertSame(401, $e->getCode());
+            $this->assertSame('Invalid access_token', $e->getMAXError()->getMessage());
+            $this->assertSame(MAXErrorReason::TOKEN_INVALID, $e->getMAXError()->getReason());
+        }
+    }
+
+    public function testUnknownErrorKeepsOriginalMessageWhenEnabled(): void
+    {
+        $request = $this->createRequest(MAXRequest::class, [
+            new RequestException('Client error', new Request('GET', 'me'), new Response(400, [], '{"message":"Something new"}')),
+        ], true);
+
+        try {
+            $request->get('me');
+            $this->fail('Expected MAXHttpException');
+        } catch (MAXHttpException $e) {
+            $this->assertSame('Something new', $e->getMessage());
+        }
+    }
+
+    public function testOwnExceptionClassGetsTranslatedMessageWhenEnabled(): void
+    {
+        try {
+            $this->createRequest(OwnExceptionMAXRequest::class, [self::tokenError()], true)->get('me');
+            $this->fail('Expected OwnMAXException');
+        } catch (OwnMAXException $e) {
+            $this->assertSame('Токен бота недействителен или отозван. Проверьте токен бота.', $e->getMessage());
+            $this->assertSame('Invalid access_token', MAXError::fromThrowable($e)->getMessage());
+        }
+    }
+
+    public function testSubclassWithoutParentConstructorStillWorks(): void
+    {
+        $exception = (new NoParentConstructorMAXRequest())->convert(self::tokenError());
+
+        $this->assertInstanceOf(MAXHttpException::class, $exception);
+        $this->assertSame('Invalid access_token', $exception->getMessage());
+    }
+
     public function testSkipsNonStringMessageFields(): void
     {
         $error = MAXError::fromGuzzleException(new RequestException(
@@ -286,16 +342,37 @@ class MAXErrorTest extends TestCase
     /**
      * @param class-string<MAXRequest> $class
      */
-    private function createRequest(string $class, array $responses): MAXRequest
+    private function createRequest(string $class, array $responses, bool $translate_errors = false): MAXRequest
     {
         $client = new Client(['handler' => HandlerStack::create(new MockHandler($responses))]);
 
-        return new $class('test_token', $client);
+        return new $class('test_token', $client, $translate_errors);
+    }
+
+    private static function tokenError(): RequestException
+    {
+        return new RequestException(
+            'Client error',
+            new Request('GET', 'me'),
+            new Response(401, [], '{"code":"verify.token","message":"Invalid access_token"}')
+        );
     }
 }
 
 class OwnMAXException extends \RuntimeException
 {
+}
+
+class NoParentConstructorMAXRequest extends MAXRequest
+{
+    public function __construct()
+    {
+    }
+
+    public function convert(GuzzleException $e): \Throwable
+    {
+        return $this->toMAXHttpException($e);
+    }
 }
 
 class OwnExceptionMAXRequest extends MAXRequest

@@ -10,6 +10,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use TH\MAX\Config\MAXConfig;
 use TH\MAX\Errors\MAXError;
+use TH\MAX\Errors\MAXErrorTranslator;
 use TH\MAX\Exceptions\MAXHttpException;
 use TH\MAX\Interfaces\MAXRequestInterface;
 
@@ -17,13 +18,21 @@ class MAXRequest implements MAXRequestInterface
 {
     private ClientInterface $client;
     private string $access_token;
+    // Значение по умолчанию — для наследников, которые не вызывают родительский конструктор
+    private bool $translate_errors = false;
 
+    /**
+     * @param bool $translate_errors true — текст исключения на русском (MAXErrorTranslator), если ошибка
+     *                               распознана. По умолчанию выключено: текст как в ответе MAX, как раньше.
+     */
     public function __construct(
         string $access_token,
-        ?ClientInterface $client = null
+        ?ClientInterface $client = null,
+        bool $translate_errors = false
     ) {
         $this->client = $client ?? new Client();
         $this->access_token = $access_token;
+        $this->translate_errors = $translate_errors;
     }
 
     /**
@@ -133,7 +142,12 @@ class MAXRequest implements MAXRequestInterface
     {
         // Текст ошибки — из полей ответа MAX, а если ответ не JSON — сырое тело
         $error = MAXError::fromGuzzleException($e);
-        $exception = $this->createException($error->getMessage(), $error->getStatus(), $e);
+        $message = $error->getMessage();
+        if ($this->translate_errors) {
+            // Исходный текст MAX остаётся в getMAXError()->getMessage()
+            $message = MAXErrorTranslator::translate($error) ?? $message;
+        }
+        $exception = $this->createException($message, $error->getStatus(), $e);
         if ($exception instanceof MAXHttpException) {
             $exception->setMAXError($error);
         }
