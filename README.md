@@ -254,6 +254,49 @@ SDK обрабатывает различные форматы ошибок от
 
 Если ответ не в формате JSON, SDK вернет сырое тело ответа.
 
+### Понятные ошибки на русском
+
+MAX отвечает на ошибку так: `{"code": "verify.token", "message": "Invalid access_token"}`. SDK сохраняет и код, и текст, определяет причину ошибки и даёт понятный текст на русском: что случилось и что сделать.
+
+```php
+use TH\MAX\Errors\MAXErrorReason;
+use TH\MAX\Errors\MAXErrorTranslator;
+use TH\MAX\Exceptions\MAXHttpException;
+
+try {
+    $client->messages()->send(user_id: 12345, text: $text);
+} catch (MAXHttpException $e) {
+    $error = $e->getMAXError();
+
+    $error->getStatus();     // 400 — HTTP-код; 0, если ответа не было (сбой сети)
+    $error->getErrorCode();  // поле code ответа MAX или null
+    $error->getReason();     // MAXErrorReason::TEXT_TOO_LONG
+    $error->getParams();     // ['size' => 4003, 'limit' => 4000]
+
+    echo MAXErrorTranslator::translate($error) ?? $e->getMessage();
+    // Текст сообщения длиннее 4000 символов (сейчас 4003). Сократите текст.
+
+    if ($error->getReason() === MAXErrorReason::DIALOG_SUSPENDED) {
+        // пользователь остановил диалог с ботом — дальше ему не пишем
+    }
+}
+```
+
+- Причины — константы `MAXErrorReason`: их значения не меняются, их можно хранить в базе.
+- По умолчанию текст исключения — как в ответе MAX, как в прежних версиях. Чтобы SDK сам подставлял русский текст, включите перевод третьим параметром `MAXRequest`:
+
+  ```php
+  $request = new MAXRequest($accessToken, null, true);
+  // $e->getMessage() — текст на русском, если ошибка распознана, иначе исходный текст MAX
+  // $e->getMAXError()->getMessage() — исходный текст MAX
+  ```
+
+  Если вы сохраняете ошибку, чтобы потом разобрать её снова (`MAXError::fromMessage()`) или искать по тексту, при включённом переводе сохраняйте `getMAXError()->getMessage()` или `getMAXError()->getReason()`: русский текст разбор не распознает.
+- `MAXErrorTranslator::translate()` возвращает `null`, если ошибка не распознана. Тогда покажите исходный текст `$e->getMessage()`.
+- Тексты не привязаны к продукту. Нужен совет про свой интерфейс — подставьте свой текст по `getReason()`.
+- Для уже сохранённого текста ошибки, без ответа MAX: `MAXError::fromMessage($text)`.
+- Если вы бросаете свой класс исключения через `createException()`, разберите его так: `MAXError::fromThrowable($e)`. Ответ MAX найдётся в цепочке `getPrevious()`. Тело ответа при этом читается ещё раз: у обычного клиента Guzzle это работает, а при `'stream' => true` код MAX и причина по тексту потеряются — останется только разбор по HTTP-коду.
+
 ## Конфигурация
 
 ### Базовый URL API
@@ -316,7 +359,7 @@ class AppMAXRequest extends MAXRequest
 }
 ```
 
-Логика парсинга ответа API (извлечение человекочитаемого сообщения из JSON) остаётся в SDK — вы получаете готовое сообщение в параметре `$message`.
+Логика парсинга ответа API (извлечение человекочитаемого сообщения из JSON) остаётся в SDK — вы получаете готовое сообщение в параметре `$message`. Код MAX и причину ошибки из такого исключения достаёт `MAXError::fromThrowable($e)`.
 
 ## Полный пример использования
 

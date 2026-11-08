@@ -6,10 +6,12 @@ namespace TH\MAX\Exceptions;
 
 use GuzzleHttp\Exception\GuzzleException;
 use RuntimeException;
+use TH\MAX\Errors\MAXError;
 
 class MAXHttpException extends RuntimeException
 {
     private ?GuzzleException $originalException;
+    private ?MAXError $error = null;
 
     public function __construct(string $message, int $code = 0, ?GuzzleException $originalException = null)
     {
@@ -25,5 +27,27 @@ class MAXHttpException extends RuntimeException
     public function hasOriginalException(): bool
     {
         return $this->originalException !== null;
+    }
+
+    /**
+     * Ошибка в разобранном виде: код MAX, причина и параметры.
+     */
+    public function getMAXError(): MAXError
+    {
+        if ($this->error === null) {
+            $this->error = MAXError::fromThrowable($this);
+        }
+
+        return $this->error;
+    }
+
+    /**
+     * Ошибку разбирает MAXRequest один раз и кладёт сюда: тело ответа можно прочитать не всегда дважды.
+     *
+     * @internal
+     */
+    public function setMAXError(MAXError $error): void
+    {
+        $this->error = $error;
     }
 }
